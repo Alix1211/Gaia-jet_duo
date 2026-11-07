@@ -47,4 +47,4 @@ node bundle.mjs
 node smoke-preview.cjs ../GAIA-JET-DUO-v14-7TEAM.html --physics-tests
 ```
 
-Both source and bundled offline tests passed in this session. The generated single-file HTML is outside the repo root: `../GAIA-JET-DUO-v14-7TEAM.html` (~7.83 MB). Check any new commit and `git ls-remote` against GitHub after pushing, and record exactly whether the push succeeded.
+Both source and bundled offline tests passed in this session. The generated single-file HTML is outside the repo root: `../GAIA-JET-DUO-v14-7TEAM.html` (~8.13 MB). The bundler/tests now reject empty team images: one zero-byte ROYAL front WebP was detected during review and rebuilt from the unchanged original PNG. Check any new commit and `git ls-remote` against GitHub after pushing, and record exactly whether the push succeeded.

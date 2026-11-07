@@ -7,6 +7,10 @@ const assert = require('node:assert/strict');
 const { createCanvas, Image } = require('@napi-rs/canvas');
 
 const dir = __dirname;
+const teamDir=path.join(dir,'assets','teams');
+const teamFiles=fs.readdirSync(teamDir).filter(name=>name.endsWith('.webp'));
+assert.equal(teamFiles.length,21,'Expected seven teams × three optimized WebP sprites');
+for(const file of teamFiles)assert(fs.statSync(path.join(teamDir,file)).size>1000,`Empty team sprite: ${file}`);
 const htmlPath = process.argv.slice(2).find(arg => !arg.startsWith('--')) || path.join(dir, 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1]

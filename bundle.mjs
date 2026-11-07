@@ -21,7 +21,9 @@ if(files.length<40)throw Error(`Team assets missing: only ${files.length} images
 const teamAssignments=[];
 for(const file of files){
  const mime=file.endsWith('.png')?'image/png':'image/webp';
- const src=`data:${mime};base64,${fs.readFileSync(path.join(assetDir,file)).toString('base64')}`;
+ const bytes=fs.readFileSync(path.join(assetDir,file));
+ if(bytes.length<100)throw Error(`Empty or damaged sprite: ${file}`);
+ const src=`data:${mime};base64,${bytes.toString('base64')}`;
  // Replace JS Image loaders and the seven portrait <img> tags on the start card.
  const jsMarker=`'${file}'`,htmlMarker=`"assets/${file}"`;
  if(file.startsWith('teams/')){
