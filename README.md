@@ -12,7 +12,7 @@
 - `smoke-preview.cjs` — preview, physics and combat smoke tests.
 - `HANDOFF.md` — verified status, decisions, open issues and tests for the next session.
 
-Run `node bundle.mjs` to create `../GAIA-JET-DUO-v15.2-SPEED-FIX.html` as a standalone offline game file. Run `node smoke-preview.cjs --physics-tests` to verify gameplay; run with `../GAIA-JET-DUO-v15.2-SPEED-FIX.html` to test the offline output. Previous v14.1 and v15 builds remain as separate rollback builds. v15.2 specifically restores the legacy **5.2× world-motion factor** while scaling circuit geometry to retain a long lap.
+Run `node bundle.mjs` to create `../GAIA-JET-DUO-v15.3-SPEED-FEEL.html` as a standalone offline game file. Run `node smoke-preview.cjs --physics-tests` to verify gameplay; run with `../GAIA-JET-DUO-v15.3-SPEED-FEEL.html` to test the offline output. Previous v14.1, v15 and v15.2 builds remain as separate rollback builds. v15.3 further raises the world-motion factor to **8.2×** (buoys move past ~58% faster than v15.2) while keeping the roughly 90-second lap. It adds scrolling water-texture samples, world-anchored foam, a subtle speed-/boost-sensitive camera lens and denser original-art wake/splash. No character artwork or HUD text was altered.
 
 **Sprite cutout repair:** the original 3-pose image sheets were *not* evenly spaced; naive `width/3` cropping cut whole characters and jetski hulls. Use `python rebuild-team-sheets.py` to detect the three largest intact alpha components, place each on its own generously padded cell, strip detached speck components, export cleaned transparent PNGs and correctly aligned compressed game WebPs, and assert alpha-free frame borders. Do not split the original source sheets into three equal widths again.
 

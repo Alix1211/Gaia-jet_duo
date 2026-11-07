@@ -40,11 +40,12 @@
 const canvas=document.getElementById('race'),ctx=canvas.getContext('2d',{alpha:false});
 const mini=document.getElementById('map'),mc=mini.getContext('2d');
 const speedEl=document.getElementById('speed'),distEl=document.getElementById('distance'),lapEl=document.getElementById('lap');
-// Racing coordinates are arcade units (5.2 world units per physical metre).
-// Keep the visual speed of v14 while the 5km oval still takes roughly 90-110 seconds per lap.
-const WORLD_SCALE=5.2,COURSE=5000*WORLD_SCALE,LANE=210,keys={left:false,right:false,fire:false};
+// Racing coordinates are intentionally exaggerated: buoy/foam travel is faster than the speedometer's physical scale.
+// Scaling the oval and travel together preserves the ~90-second 5 km lap.
+const WORLD_SCALE=8.2,COURSE=5000*WORLD_SCALE,LANE=210,keys={left:false,right:false,fire:false};
 let w=960,h=600,dpr=1,mode='ready',last=performance.now(),elapsed=0,visualTime=0,toastTimer=0,shake=0;
 const BASE_SPEED=199,BOOST_DURATION=2.25,BOOST_EXTRA=119;
+const PROJECTILE_SPEED=600*WORLD_SCALE/5.2;
 const WAVE_START=1050*WORLD_SCALE,WAVE_SPACING=1600*WORLD_SCALE,WAVE_DURATION=1.27;
 const TRACK_RADIUS=460*WORLD_SCALE,TRACK_STRAIGHT=(COURSE-2*Math.PI*TRACK_RADIUS)/2;
 const PLAYER_SPEC={accel:1.35,handling:1,grip:1,mass:1};
@@ -144,12 +145,24 @@ function waveRibbons(){
 function drawMovingWater(hy){
  const waterId=themes[themeIndex].water;
  if(!ready(waterId))return;
- const img=art[waterId],waterH=h-hy,bandSize=30;
- ctx.save();ctx.beginPath();ctx.rect(0,hy,w,waterH);ctx.clip();ctx.globalAlpha=.78;
+ const img=art[waterId],waterH=h-hy,bandSize=34,ih=img.naturalHeight;
+ const speedFeel=clamp((player.speed-55)/245,0,1),rush=clamp(player.boost/BOOST_DURATION,0,1);
+ ctx.save();ctx.beginPath();ctx.rect(0,hy,w,waterH);ctx.clip();
+ // Keep the painted depth colours and highlights; scroll a second copy across its surface.
+ ctx.globalAlpha=.65;
+ ctx.drawImage(img,0,0,img.naturalWidth,ih,0,hy,w,waterH);
  for(let yy=0;yy<waterH;yy+=bandSize){
-  const band=Math.min(bandSize,waterH-yy),sy=yy/waterH*img.naturalHeight,sh=band/waterH*img.naturalHeight;
-  const ripple=4.3*Math.sin(visualTime*(1.3+player.speed*.002)+yy*.015)+2.2*Math.sin(visualTime*.72+yy*.008);
-  ctx.drawImage(img,0,sy,img.naturalWidth,sh,-10+ripple,hy+yy,w+20,band+.6);
+  const band=Math.min(bandSize,waterH-yy),frac=(yy+band*.5)/waterH;
+  const flow=player.s*(.10+.22*frac*frac)+visualTime*(5+19*frac)+rush*visualTime*35;
+  const phase=((frac*ih+flow)%ih+ih)%ih,other=(phase+ih*.5)%ih;
+  const weight=Math.sin(Math.PI*phase/ih)**2;
+  const width=w+18,dx=-9+Math.sin(visualTime*3+frac*11)*4;
+  const opacity=(.18+.33*Math.pow(frac,.75))*(.40+.60*speedFeel)+rush*.09;
+  // Both samples fade out at their wrap seam: no sudden texture jumps during fast motion.
+  ctx.globalAlpha=opacity*weight;
+  ctx.drawImage(img,0,phase,img.naturalWidth,Math.min(10,ih-phase),dx,hy+yy,width,band+.7);
+  ctx.globalAlpha=opacity*(1-weight);
+  ctx.drawImage(img,0,other,img.naturalWidth,Math.min(10,ih-other),dx,hy+yy,width,band+.7);
  }
  ctx.restore();
 }
@@ -159,13 +172,14 @@ function drawWaterSheet(id,frame,x,y,width,height,opacity,flipped=false){
  ctx.save();ctx.globalAlpha=clamp(opacity,0,1);ctx.translate(x,y);if(flipped)ctx.scale(-1,1);
  ctx.drawImage(img,srcX*k,0,srcW*k,img.naturalHeight,-width*.5,-height*.5,width,height);ctx.restore();
 }
-function wakeArt(x,bottom,jetHeight,lean,airFactor=0,landing=0,boost=0,small=false){
+function wakeArt(x,bottom,jetHeight,lean,airFactor=0,landing=0,boost=0,small=false,speed=0){
  const keep=airFactor>0?.04:1,eff=jetHeight*(small?.88:1),f=1+.22*Math.sin(visualTime*18);
- const rearWidth=eff*(landing>0?1.35:.97),rearHeight=eff*.62;
- // 물보라 원본 세 크기를 합성하면서 시인성을 소폭 높인다.
- drawWaterSheet('rear',landing>0?0:1,x,bottom-eff*.07,rearWidth,rearHeight,keep*(landing>0?.60:.28));
- drawWaterSheet('rear',2,x+Math.sin(visualTime*11)*3,bottom+eff*.01,eff*.72,eff*.38,keep*(boost>0?.45:.23)*f);
- if(Math.abs(lean)>.14){const sideRight=lean>0;drawWaterSheet('side',boost>0?0:1,x+(sideRight?1:-1)*eff*.44,bottom-eff*.28,eff*.78,eff*.66,keep*(.24+Math.abs(lean)*.28),sideRight)}
+ const rush=clamp((speed-90)/210,0,1),boostRush=boost>0?clamp(boost/BOOST_DURATION,0,1):0;
+ const rearWidth=eff*(landing>0?1.35:1.02+rush*.36+boostRush*.12),rearHeight=eff*(.62+rush*.16);
+ // Use only the original transparent spray assets: higher speed makes longer, denser wakes.
+ drawWaterSheet('rear',landing>0?0:1,x,bottom-eff*.07,rearWidth,rearHeight,keep*(landing>0?.67:.22+rush*.22));
+ drawWaterSheet('rear',2,x+Math.sin(visualTime*(11+4*rush))*3,bottom+eff*.01,eff*(.72+rush*.22),eff*(.38+rush*.10),keep*(.20+rush*.17+boostRush*.20)*f);
+ if(Math.abs(lean)>.14){const sideRight=lean>0;drawWaterSheet('side',boost>0?0:1,x+(sideRight?1:-1)*eff*.44,bottom-eff*.28,eff*(.78+rush*.14),eff*.66,keep*(.24+Math.abs(lean)*.28+rush*.10),sideRight)}
 }
 function laneOnTrack(s,lane){const t=trackAt(s);return{x:t.x+t.ty*lane,y:t.y-t.tx*lane}}
 function resize(){const r=canvas.getBoundingClientRect();w=Math.max(320,r.width);h=Math.max(220,r.height);dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const m=mini.getBoundingClientRect();mini.width=Math.max(40,Math.round(m.width*2));mini.height=Math.max(40,Math.round(m.height*2));mc.setTransform(2,0,0,2,0,0)}
@@ -223,7 +237,7 @@ function nearestTarget(owner,maxRange=650){
 function shoot(owner,target=nearestTarget(owner)){
  if(!target||shots.length>=48)return false;
  const fromPlayer=owner===player,dir=Math.sign(target.s-owner.s)||1;
- const travel=Math.max(.18,Math.abs(target.s-owner.s)/600);
+ const travel=Math.max(.18,Math.abs(target.s-owner.s)/PROJECTILE_SPEED);
  const aimError=fromPlayer?0:Math.sin(elapsed*5.1+owner.wave*3.7)*(1-owner.skill)*135;
  const laneVel=clamp((target.lane-owner.lane+aimError)/travel,-315,315);
  shots.push({s:owner.s+dir*35,lane:owner.lane,dir,owner,laneVel,life:1.7,trail:0});
@@ -255,7 +269,7 @@ function waterHit(target,owner){
 function updateShots(dt,oldS,oldLane,oldBots){
  for(let i=shots.length-1;i>=0;i--){
   const shot=shots[i],before=shot.s,oldShotLane=shot.lane;
-  shot.life-=dt;shot.trail+=dt;shot.s+=shot.dir*600*dt;shot.lane+=shot.laneVel*dt;
+  shot.life-=dt;shot.trail+=dt;shot.s+=shot.dir*PROJECTILE_SPEED*dt;shot.lane+=shot.laneVel*dt;
   for(let j=-1;j<bots.length;j++){
    const t=j<0?player:bots[j],prev=j<0?{s:oldS,lane:oldLane}:oldBots[j];
    if(t===shot.owner||(t.air||0)>.22)continue;
@@ -427,11 +441,13 @@ function update(dt){
 function poly(points,fill,stroke,width=1){if(points.length<2)return;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=width;ctx.strokeStyle=stroke;ctx.stroke()}}
 function line(points,color,width=1){ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
 function proj(z,off=0){
- const near=104,foc=w*.98,depth=z+near,origin=trackAt(player.s);
+ // Speed-sensitive lens: faster races and boosts draw nearby objects past the camera more decisively.
+ const rush=clamp((player.speed-105)/220,0,1),boostRush=player.boost>0?clamp(player.boost/BOOST_DURATION,0,1):0;
+ const near=104-rush*8-boostRush*2,foc=w*.98*(1+rush*.055+boostRush*.035),depth=z+near,origin=trackAt(player.s);
  const other=laneOnTrack(player.s+z,off),p0=laneOnTrack(player.s,player.lane);
  const relative=(other.x-p0.x)*origin.ty-(other.y-p0.y)*origin.tx;
  const focus=clamp(1150/(z+450),.55,1),sc=foc/depth;
- return{x:w*.5+relative*sc*focus,y:h*.21+(h*127)/depth,sc};
+ return{x:w*.5+relative*sc*focus,y:h*.21+(h*127)*(1+rush*.09+boostRush*.04)/depth,sc};
 }
 function background(){const hy=h*.21,theme=themes[themeIndex];
 if(theme.sky&&ready(theme.sky)){
@@ -446,11 +462,11 @@ if(theme.sky&&ready(theme.sky)){
 }
 const water=ctx.createLinearGradient(0,hy,0,h);water.addColorStop(0,theme.palette[0]);water.addColorStop(.42,theme.palette[1]);water.addColorStop(1,theme.palette[2]);ctx.fillStyle=water;ctx.fillRect(0,hy,w,h-hy);
 drawMovingWater(hy);
-ctx.save();ctx.strokeStyle='#bafaff40';for(let k=0;k<45;k++){const frac=((k*37+elapsed*(20+player.speed*.34))%500)/500;const y=hy+frac*frac*(h-hy);ctx.globalAlpha=.09+.32*frac;ctx.lineWidth=1+frac*1.5;ctx.beginPath();for(let j=0;j<7;j++){const x=(k*263+j*191+Math.sin(k*1.2)*90)%w;ctx.moveTo(x,y+j%2*3);ctx.lineTo(x+13+frac*48,y+j%2*3)}ctx.stroke()}ctx.restore();
+ctx.save();ctx.strokeStyle='#bafaff40';for(let k=0;k<45;k++){const frac=((k*37+player.s*.60)%500+500)%500/500;const y=hy+frac*frac*(h-hy);ctx.globalAlpha=.08+.36*frac;ctx.lineWidth=1+frac*1.5;ctx.beginPath();for(let j=0;j<7;j++){const x=(k*263+j*191+Math.sin(k*1.2)*90)%w;ctx.moveTo(x,y+j%2*3);ctx.lineTo(x+13+frac*48,y+j%2*3)}ctx.stroke()}ctx.restore();
 // Sparse near-water streaks add motion without changing the illustrated water texture.
 const rush=clamp((player.speed-145)/205,0,1);
 if(rush>.02){ctx.save();ctx.strokeStyle='#d0ffff';ctx.lineCap='round';for(let i=0;i<14;i++){
- const phase=((visualTime*(.48+player.speed/225)+i*.197)%1),y=hy+Math.pow(phase,1.55)*(h-hy);
+ const phase=((visualTime*(.38+player.speed/160)+i*.197)%1),y=hy+Math.pow(phase,1.55)*(h-hy);
  const x=((i*229+63)%Math.max(1,w)),len=(12+phase*110)*rush;
  ctx.globalAlpha=(.035+.15*phase)*rush;ctx.lineWidth=1+phase*1.8;
  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(i%2?1:-1)*len*.12,y+len);ctx.stroke();
@@ -545,7 +561,7 @@ function rivals(){
    const frameW=jetSide*cell/img.naturalHeight;
    const waveRise=swellAt(b.s,b.lane)*Math.min(17,jetSide*.055)+(b.air>0?Math.sin((1-b.air/1.1)*Math.PI)*Math.min(34,jetSide*.20):0);
    softShadow(p.x,botBottom-jetSide*.04,jetSide*.47,Math.max(2,jetSide*.11),.78-waveRise*.012);
-   wakeArt(p.x,botBottom,jetSide,lean,waveRise,b.impact,b.boost,true);
+   wakeArt(p.x,botBottom,jetSide,lean,waveRise,b.impact,b.boost,true,b.speed);
    const bob=jetBob(b.wave,b.speed)*clamp(jetSide/390,.25,.8),hitIntensity=clamp(b.impact/.62,0,1);
    const roll=lean*.013+Math.sin(visualTime*2+b.wave)*.009+Math.sin(visualTime*26+b.wave)*hitIntensity*.095+b.hitLean*hitIntensity*.16;
    ctx.save();ctx.translate(p.x+b.hitLean*hitIntensity*size*.11,botBottom+bob-waveRise-Math.sin(hitIntensity*Math.PI)*hitIntensity*size*.10);ctx.rotate(roll);
@@ -566,7 +582,7 @@ function playerCraft(){
  const spriteH=clamp(Math.min(w,h)*.52,210,390),spriteW=spriteH*.75,bottom=h*.96,frame=spriteFrame(visualLean);
  const airborne=air>0||wave.lift<-.5;
  softShadow(x,bottom-8,spriteW*.60,spriteH*.125,airborne?clamp(.96+(wave.lift-air)/120,.30,.94):.96);
- wakeArt(x,bottom,spriteH,visualLean,airborne?Math.max(air,-wave.lift):0,Math.max(player.landing,player.impact,wave.splash*.57),player.boost);
+ wakeArt(x,bottom,spriteH,visualLean,airborne?Math.max(air,-wave.lift):0,Math.max(player.landing,player.impact,wave.splash*.57),player.boost,false,player.speed);
  const shooting=player.fire>0,shotKeys=player.fireMode===1?['frontStraight','frontLeft','frontRight']:['fireStraight','fireLeft','fireRight'];
  const key=shooting?shotKeys[frame]:['straight','left','right'][frame],id=ready(key)?key:'straight';
  const bob=airborne?0:jetBob(.35,player.speed),landAge=1-player.landing/.55;

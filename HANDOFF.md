@@ -90,3 +90,15 @@ Source and standalone physics/render tests pass, including oval closure, lap rol
 - Added an automated regression asserting world motion remains `5.2 × speed/3.6` and the nominal 5km lap stays roughly 90 seconds. Source and offline bundle passed; 200-second world simulation finished at ~49,863 arcade units with no end cutoff.
 
 **Limitations:** Headless canvas screenshots and physics tests are available, but a real browser/device interactive run was not completed. The connected browser was unavailable and a cloud-browser attempt to open the local `file:` URL was refused by browser policy; no further bypass attempted. User must visually verify speed and frame rate on their tablet before declaring the problem closed.
+
+## v15.3 — apparent speed / buoy travel / visual motion
+
+The user said v15.2 still felt slow (even v14 was not particularly fast) and explicitly approved increasing **buoy fly-past speed**, moving surface water, camera speed response and wake/boost impact together in one test build. The graphic standard takes precedence: keep team images, cutouts and HUD unchanged.
+
+- `WORLD_SCALE` raised from **5.2** to **8.2**; world-coordinate buoy and road geometry now approach/pass about **58% faster** at the same speedometer reading. Circuit circumference, curve radius, waves and heart positions all scale with the same factor, keeping nominal lap duration at ~90.5 seconds. Buoys stay at the original 210-unit world gap, which makes them more frequent in time, so watch on-device feel.
+- Ocean artwork keeps its static depth composition plus a moving semi-transparent sampled layer. Its speed varies with surface depth and increases with the boost, preserving a continuous wrap using crossfaded half-cycle samples. World-positioned small foam highlights and near-water streaks also cross the screen more rapidly; no textual effects were added.
+- Projection uses speed- and boost-sensitive lens depth/scale and a mild foreground expansion. Existing original transparent spray sheets respond more intensely to higher speed and boost, and both player/rival craft use their actual speeds for wake strength.
+- Bubble projectile world travel speed scales from `600` to `600 × 8.2 / 5.2` with the racing units, preserving relative hit timing. Auto-targeting, damage, AI, jumping, handling and all seven team graphics remain intact.
+- `bundle.mjs` now emits `../GAIA-JET-DUO-v15.3-SPEED-FEEL.html`. Test source and bundled HTML with `smoke-preview.cjs --physics-tests`. New smoke assertions check the increased buoy pass rate and unchanged long-lap duration.
+
+**Still unverified:** actual motion feel/FPS on the user's Android tablet; screenshots from the headless canvas cannot prove perceived frame rate. Deliver as a test build, not an announced final release. Do not push to GitHub without fresh authorization; a preceding remote push was denied.

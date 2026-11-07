@@ -93,10 +93,13 @@ async function main() {
     const speedStart=player.s;
     update(1/60);
     const actualDelta=player.s-speedStart,expectedDelta=199/3.6*WORLD_SCALE/60;
-    assert(Math.abs(actualDelta-expectedDelta)<.5,'Arcade visual pace dropped below the established 5.2x world scale');
+    assert(Math.abs(actualDelta-expectedDelta)<.5,'Arcade world-coordinate motion does not match the speedometer');
+    assert(WORLD_SCALE>=8,'Buoy pass rate regressed below the requested faster visual pace');
+    const buoyInterval=210/(199/3.6*WORLD_SCALE);
+    assert(buoyInterval<.5,'Buoys still pass too slowly at racing speed');
     const nominalLapSeconds=COURSE/(199/3.6*WORLD_SCALE);
     assert(nominalLapSeconds>85&&nominalLapSeconds<105,'The speed fix accidentally shortened the full lap');
-    console.log('Arcade on-screen pace / long-lap duration: OK',actualDelta.toFixed(2),nominalLapSeconds.toFixed(1)+'s');
+    console.log('Arcade speed / buoy pass / long-lap duration: OK',actualDelta.toFixed(2),buoyInterval.toFixed(2)+'s per buoy',nominalLapSeconds.toFixed(1)+'s');
     const startTrack=trackAt(0),endTrack=trackAt(COURSE);
     assert(Math.hypot(startTrack.x-endTrack.x,startTrack.y-endTrack.y)<.001,'Circular circuit does not close');
     assert.equal(curveAt(100),0,'First straight missing');
