@@ -40,11 +40,13 @@
 const canvas=document.getElementById('race'),ctx=canvas.getContext('2d',{alpha:false});
 const mini=document.getElementById('map'),mc=mini.getContext('2d');
 const speedEl=document.getElementById('speed'),distEl=document.getElementById('distance'),lapEl=document.getElementById('lap');
-const COURSE=5000,LANE=210,keys={left:false,right:false,fire:false};
+// Racing coordinates are arcade units (5.2 world units per physical metre).
+// Keep the visual speed of v14 while the 5km oval still takes roughly 90-110 seconds per lap.
+const WORLD_SCALE=5.2,COURSE=5000*WORLD_SCALE,LANE=210,keys={left:false,right:false,fire:false};
 let w=960,h=600,dpr=1,mode='ready',last=performance.now(),elapsed=0,visualTime=0,toastTimer=0,shake=0;
 const BASE_SPEED=199,BOOST_DURATION=2.25,BOOST_EXTRA=119;
-const WAVE_START=1050,WAVE_SPACING=1600,WAVE_DURATION=1.27;
-const TRACK_RADIUS=460,TRACK_STRAIGHT=(COURSE-2*Math.PI*TRACK_RADIUS)/2;
+const WAVE_START=1050*WORLD_SCALE,WAVE_SPACING=1600*WORLD_SCALE,WAVE_DURATION=1.27;
+const TRACK_RADIUS=460*WORLD_SCALE,TRACK_STRAIGHT=(COURSE-2*Math.PI*TRACK_RADIUS)/2;
 const PLAYER_SPEC={accel:1.35,handling:1,grip:1,mass:1};
 // A closed stadium-shaped circuit: two straights and two half-circle corners.
 function trackAt(s){
@@ -65,17 +67,17 @@ const SURF_PROFILES=[
  {wave:.80,turn:4.3,release:1.95,irregular:0}
 ];
 const TEAM_DEFS=[
- {id:'ROYAL',name:'ROYAL',col:'#f9d7b3',s:105,lane:-65,top:214,accel:.82,handling:.80,grip:.92,mass:1.38,skill:.91,aggression:.75,wave:.2},
- {id:'NOIR',name:'NOIR',col:'#c391fa',s:160,lane:68,top:218,accel:1.12,handling:1.02,grip:1.02,mass:1.02,skill:.96,aggression:1.0,wave:1.3},
- {id:'RED',name:'RED',col:'#ff6868',s:230,lane:5,top:222,accel:1.24,handling:.82,grip:.79,mass:1.12,skill:.86,aggression:1.27,wave:2.7},
- {id:'PINK',name:'PINK',col:'#ff7ad8',s:56,lane:100,top:192,accel:1.30,handling:1.42,grip:1.34,mass:.73,skill:.94,aggression:.72,wave:.9},
- {id:'LEATHER',name:'LEATHER',col:'#b58cff',s:300,lane:-105,top:226,accel:.70,handling:.70,grip:.79,mass:1.55,skill:.87,aggression:1.06,wave:2.2},
- {id:'KPOP',name:'K-POP',col:'#69f2f1',s:-60,lane:45,top:205,accel:1.48,handling:1.26,grip:1.16,mass:.82,skill:.97,aggression:1.08,wave:3.3},
- {id:'DUMMY',name:'DUMMY',col:'#a8f85f',s:-130,lane:-20,top:183,accel:1.03,handling:1.04,grip:1.01,mass:1,skill:.78,aggression:.62,wave:4.4}
+ {id:'ROYAL',name:'ROYAL',col:'#f9d7b3',s:105*WORLD_SCALE,lane:-65,top:214,accel:.82,handling:.80,grip:.92,mass:1.38,skill:.91,aggression:.75,wave:.2},
+ {id:'NOIR',name:'NOIR',col:'#c391fa',s:160*WORLD_SCALE,lane:68,top:218,accel:1.12,handling:1.02,grip:1.02,mass:1.02,skill:.96,aggression:1.0,wave:1.3},
+ {id:'RED',name:'RED',col:'#ff6868',s:230*WORLD_SCALE,lane:5,top:222,accel:1.24,handling:.82,grip:.79,mass:1.12,skill:.86,aggression:1.27,wave:2.7},
+ {id:'PINK',name:'PINK',col:'#ff7ad8',s:56*WORLD_SCALE,lane:100,top:192,accel:1.30,handling:1.42,grip:1.34,mass:.73,skill:.94,aggression:.72,wave:.9},
+ {id:'LEATHER',name:'LEATHER',col:'#b58cff',s:300*WORLD_SCALE,lane:-105,top:226,accel:.70,handling:.70,grip:.79,mass:1.55,skill:.87,aggression:1.06,wave:2.2},
+ {id:'KPOP',name:'K-POP',col:'#69f2f1',s:-60*WORLD_SCALE,lane:45,top:205,accel:1.48,handling:1.26,grip:1.16,mass:.82,skill:.97,aggression:1.08,wave:3.3},
+ {id:'DUMMY',name:'DUMMY',col:'#a8f85f',s:-130*WORLD_SCALE,lane:-20,top:183,accel:1.03,handling:1.04,grip:1.01,mass:1,skill:.78,aggression:.62,wave:4.4}
 ];
 const player={s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0};
 const bots=TEAM_DEFS.map(t=>({...t,speed:t.top*.89,baseLane:t.lane,sideVel:0,air:0,boost:0,boostMeter:25+t.skill*30,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0,fire:0,shotCooldown:1.5+t.wave*.3,hitCombo:0,comboTime:0}));
-const shots=[],bursts=[],hearts=Array.from({length:13},(_,i)=>({s:310+i*360,nextS:310+i*360,lane:[-90,0,90,40,-50][i%5],taken:false}));
+const shots=[],bursts=[],hearts=Array.from({length:13},(_,i)=>({s:(310+i*360)*WORLD_SCALE,nextS:(310+i*360)*WORLD_SCALE,lane:[-90,0,90,40,-50][i%5],taken:false}));
 const BOOST_COST=55,BOOST_PICKUP=48,SHOT_INTERVAL=.22,COMBO_WINDOW=2.6;
 const hitBuoys=new Set(),buoyReactions=new Map();
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -106,7 +108,7 @@ function jetBob(phase,speed){
 function waveCenter(index,lane){return WAVE_START+index*WAVE_SPACING+14*Math.sin(index*.81+lane/155)+SURF_PROFILES[themeIndex].irregular*Math.sin(index*1.71+lane/78)}
 function swellAt(s,lane){
  const i=Math.max(0,Math.round((s-WAVE_START)/WAVE_SPACING));
- const d=(s-waveCenter(i,lane))/95;
+ const d=(s-waveCenter(i,lane))/(95*WORLD_SCALE);
  return Math.exp(-d*d*1.5);
 }
 function waveMotion(phase,power){
@@ -186,7 +188,7 @@ function earnBoost(amount){player.boostMeter=clamp(player.boostMeter+amount,0,10
 function jump(){if(mode!=='running')return;if(player.air<=0){
  const next=Math.max(0,Math.ceil((player.s-WAVE_START)/WAVE_SPACING));
  const crest=waveCenter(next,player.lane);
- player.air=1.15;player.wavePhase=0;earnBoost(3+(crest-player.s>=0&&crest-player.s<115?2:0));
+ player.air=1.15;player.wavePhase=0;earnBoost(3+(crest-player.s>=0&&crest-player.s<115*WORLD_SCALE?2:0));
 }}
 function boost(){
  if(mode!=='running')return;
@@ -340,9 +342,9 @@ function update(dt){
  const response=(turning?profile.turn:profile.release)*PLAYER_SPEC.handling*(1-speedSlip*.25)*(opposite?.78:1);
  const desiredSide=player.steer*(85+v*.38)/(1+speedSlip*.26);
  player.sideVel+=(desiredSide-player.sideVel)*(1-Math.exp(-dt*response));
- player.s+=(v/3.6+player.knockLong)*dt;
+ player.s+=(v/3.6*WORLD_SCALE+player.knockLong)*dt;
  player.knockLong*=Math.exp(-dt*5);
- const cornerForce=curveAt(player.s)*(v/3.6)**2*8/PLAYER_SPEC.grip;
+ const cornerForce=curveAt(player.s)*WORLD_SCALE*(v/3.6)**2*8/PLAYER_SPEC.grip;
  player.lane+=(player.sideVel+player.knock+(player.air>0?.45:1)*cornerForce)*dt;
  player.knock*=Math.exp(-dt*5);
  const uncheckedLane=player.lane;
@@ -367,12 +369,12 @@ function update(dt){
   b.hitCooldown=Math.max(0,b.hitCooldown-dt);
   b.impact=Math.max(0,b.impact-dt);
   b.air=Math.max(0,b.air-dt);
-  const nearCorner=curveAt(b.s+80)>0;
+  const nearCorner=curveAt(b.s+80*WORLD_SCALE)>0;
   const cornerSpeed=nearCorner?clamp((b.handling*b.grip)/1.17,.77,1):1;
   const boosted=b.boost>0;
   const targetSpeed=(b.top*cornerSpeed+(boosted?BOOST_EXTRA*.88:0))*(b.slowTime>0?.76:1);
   b.speed+=(targetSpeed-b.speed)*Math.min(1,dt*b.accel*(boosted?2.8:1));
-  b.s+=(b.speed/3.6+b.knockLong)*dt;
+  b.s+=(b.speed/3.6*WORLD_SCALE+b.knockLong)*dt;
   b.knockLong*=Math.exp(-dt*4.5);
   // Lane choice: each team follows its own racing line and overtakes nearby craft.
   let avoid=0;
@@ -383,7 +385,7 @@ function update(dt){
   }
   for(const shot of shots){if(shot.owner===b)continue;const gap=shot.s-b.s;if(Math.abs(gap)<190&&Math.abs(shot.lane-b.lane)<42)avoid+=(b.lane<shot.lane?-65:65)*b.skill;}
   const desiredLane=clamp(b.baseLane+Math.sin(elapsed*.36+b.wave)*47+avoid,-LANE+40,LANE-40);
-  const curveDrift=curveAt(b.s)*(b.speed/3.6)**2*8/b.grip;
+  const curveDrift=curveAt(b.s)*WORLD_SCALE*(b.speed/3.6)**2*8/b.grip;
   const desiredSide=clamp((desiredLane-b.lane)*b.handling*1.35-curveDrift*.80,-150*b.handling,150*b.handling);
   b.sideVel+=(desiredSide-b.sideVel)*(1-Math.exp(-dt*3.4*b.handling));
   b.lane=clamp(b.lane+(b.sideVel+b.knock+curveDrift)*dt,-LANE+33,LANE-33);
@@ -391,7 +393,7 @@ function update(dt){
   // Good rivals anticipate wave crests, make a visible jump, and earn their boost.
   const next=Math.max(0,Math.ceil((b.s-WAVE_START)/WAVE_SPACING));
   const crest=waveCenter(next,b.lane),distance=crest-b.s;
-  if(b.air===0&&distance>=14&&distance<36&&Math.sin(b.wave*8+next*2.7)>(.32-b.skill)){
+  if(b.air===0&&distance>=14*WORLD_SCALE&&distance<36*WORLD_SCALE&&Math.sin(b.wave*8+next*2.7)>(.32-b.skill)){
    b.air=1.1;b.boostMeter=clamp(b.boostMeter+5,0,100);
   }
   if(oldBots[bots.indexOf(b)].s<crest&&b.s>=crest&&b.air===0){

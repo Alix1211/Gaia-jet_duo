@@ -78,3 +78,15 @@ node smoke-preview.cjs ../GAIA-JET-DUO-v15-LOOP-RACE.html --physics-tests
 ```
 
 Source and standalone physics/render tests pass, including oval closure, lap rollover, rival jumping/boosting/shooting, auto-targeting in both directions, burst graphics and terrain-specific waves. No actual Android tablet FPS or hands-on handling test has been performed. The user's next step is gameplay testing, then provide downloaded BGM/SFX for linking, then consider individual team special skills.
+
+## v15.2 — visual racing speed hotfix
+
+**User found the v15 race visibly crawling despite speedometer readings.** Root cause: v14 displaced race coordinates by `(speed/3.6)*5.2` per second, but v15 changed it to `speed/3.6` in an attempt to make the 5,000m oval last longer. This accidentally slowed the scenery and buoy approach by a factor of 5.2. The game's apparent speed is **not** validated by checking the HUD speed value alone.
+
+- Introduced `WORLD_SCALE=5.2` and restored the arcade world-coordinate pace for both player and rival craft.
+- Scaled the oval length, radius, rival starting gaps, wave crest positions/spacing and heart pickup positions by the same factor. A nominal 199 km/h craft still takes about 90.5 seconds for one physical 5km lap, but world scenery flows at the former fast arcade pace.
+- Kept steering, wave buoyancy, actual player/bot speedometer values, AI firing, sprite images and the existing HUD unchanged. **An attempted unshipped AI shooting-frequency reduction was explicitly reverted** because the user pointed out that slow course motion—not shooting—is the immediate bug.
+- New standalone output: `../GAIA-JET-DUO-v15.2-SPEED-FIX.html`. Rebuild with `node bundle.mjs` and test with `node smoke-preview.cjs --physics-tests` plus bundled HTML.
+- Added an automated regression asserting world motion remains `5.2 × speed/3.6` and the nominal 5km lap stays roughly 90 seconds. Source and offline bundle passed; 200-second world simulation finished at ~49,863 arcade units with no end cutoff.
+
+**Limitations:** Headless canvas screenshots and physics tests are available, but a real browser/device interactive run was not completed. The connected browser was unavailable and a cloud-browser attempt to open the local `file:` URL was refused by browser policy; no further bypass attempted. User must visually verify speed and frame rate on their tablet before declaring the problem closed.

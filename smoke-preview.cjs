@@ -14,7 +14,7 @@ for(const file of teamFiles)assert(fs.statSync(path.join(teamDir,file)).size>100
 const htmlPath = process.argv.slice(2).find(arg => !arg.startsWith('--')) || path.join(dir, 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1]
-  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={player,bots,shots,bursts,hearts,shoot,nearestTarget,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,trackAt,curveAt,render};})();');
+  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={WORLD_SCALE,COURSE,player,bots,shots,bursts,hearts,shoot,nearestTarget,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,trackAt,curveAt,render};})();');
 const width = 1280, height = 720;
 const mainCanvas = createCanvas(width, height);
 const mapCanvas = createCanvas(112, 150);
@@ -85,23 +85,32 @@ async function main() {
   console.log('Jump:', save('jump'));
   console.log('HUD:', get('speed').innerHTML, get('distance').textContent);
   if (process.argv.includes('--physics-tests')) {
-    const { player, bots, shots, bursts, hearts, shoot, nearestTarget, waterHit, earnBoost, update, reset, hitBuoys, waveCenter, waveMotion, trackAt, curveAt, render } = context.__gaiaTest;
+    const { WORLD_SCALE,COURSE,player, bots, shots, bursts, hearts, shoot, nearestTarget, waterHit, earnBoost, update, reset, hitBuoys, waveCenter, waveMotion, trackAt, curveAt, render } = context.__gaiaTest;
     assert.equal(bots.length,7,'Seven distinct rival teams not in race');
     assert(createdImages.length>=40,'Original and seven-team animations not loaded');
-    const startTrack=trackAt(0),endTrack=trackAt(5000);
+    reset();
+    player.speed=199;
+    const speedStart=player.s;
+    update(1/60);
+    const actualDelta=player.s-speedStart,expectedDelta=199/3.6*WORLD_SCALE/60;
+    assert(Math.abs(actualDelta-expectedDelta)<.5,'Arcade visual pace dropped below the established 5.2x world scale');
+    const nominalLapSeconds=COURSE/(199/3.6*WORLD_SCALE);
+    assert(nominalLapSeconds>85&&nominalLapSeconds<105,'The speed fix accidentally shortened the full lap');
+    console.log('Arcade on-screen pace / long-lap duration: OK',actualDelta.toFixed(2),nominalLapSeconds.toFixed(1)+'s');
+    const startTrack=trackAt(0),endTrack=trackAt(COURSE);
     assert(Math.hypot(startTrack.x-endTrack.x,startTrack.y-endTrack.y)<.001,'Circular circuit does not close');
     assert.equal(curveAt(100),0,'First straight missing');
-    assert(curveAt(1500)>0,'First corner missing');
+    assert(curveAt(COURSE*.30)>0,'First corner missing');
     reset();
-    player.s=4999;player.speed=195;
+    player.s=COURSE-1;player.speed=195;
     for(let i=0;i<10;i++)update(1/60);
-    assert(player.s>5000,'Race stopped at lap boundary');
+    assert(player.s>COURSE,'Race stopped at lap boundary');
     assert.equal(get('lap').textContent,'LAP 2','Lap counter did not advance');
     console.log('Closed endless course / lap rollover: OK');
-    player.s=1200;player.lane=0;
+    player.s=1200*WORLD_SCALE;player.lane=0;
     render();console.log('Actual oval corner:',save('oval-corner'));
     reset();
-    bots[0].s=waveCenter(0,bots[0].lane)-22;
+    bots[0].s=waveCenter(0,bots[0].lane)-22*WORLD_SCALE;
     bots[0].air=0;
     update(1/60);
     assert(bots[0].air>0,'Rival did not anticipate and jump over the wave');
@@ -123,7 +132,7 @@ async function main() {
     assert(player.speed < 115 && player.knock < 0, 'Buoy impact did not brake and push inward');
     console.log('Buoy collision: OK', Math.round(player.speed), Math.round(player.knock));
     reset();
-    Object.assign(player, { s: 84, lane: -65, speed: 170 });
+    Object.assign(player, { s: bots[0].s-21, lane: -65, speed: 170 });
     update(1 / 60);
     assert(player.speed < 135 && bots[0].speed < 190, 'Craft impact failed');
     assert(player.impact > 0 && bots[0].impact > 0, 'Craft collision reaction missing');
@@ -137,7 +146,7 @@ async function main() {
     console.log('Jump clearance: OK');
     reset();
     player.speed = 199;
-    bots.forEach((b,i)=>{b.s=4500+i*80}); // isolate boost decay from rival watergun fire
+    bots.forEach((b,i)=>{b.s=COURSE*.75+i*80}); // isolate boost decay from rival watergun fire
     earnBoost(100);
     get('boost').events.pointerdown[0]({ preventDefault() {} });
     assert(player.speed >= 278, 'Boost lacks immediate speed surge');
@@ -159,7 +168,7 @@ async function main() {
     assert(player.boostMeter>startBoost,'Watergun hits must charge boost');
     console.log('Watergun/10-hit slowdown/boost generation: OK');
     reset();
-    player.s=290;player.lane=-90;player.speed=180;
+    player.s=hearts[0].s-20;player.lane=-90;player.speed=180;
     update(1/60);
     assert(hearts[0].taken,'Neon heart pickup not detected');
     assert(player.boostMeter>=85,'Neon heart does not strongly charge boost');
@@ -234,7 +243,7 @@ async function main() {
     console.log('Terrain-specific river/sea wave strength: OK');
     reset();
     for(let i=0;i<12000;i++)update(1/60);
-    assert(player.s>5000,'Endless race did not survive long-running simulation');
+    assert(player.s>COURSE,'Endless race did not survive long-running simulation');
     assert(shots.length<=48&&bursts.length<=30,'Particle or bubble buffers leaked');
     assert([player,...bots].every(c=>Number.isFinite(c.s)&&Number.isFinite(c.lane)&&Number.isFinite(c.speed)),
       'Long running physics produced a non-finite craft position or speed');
