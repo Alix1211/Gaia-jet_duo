@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#082d4f">
+<title>GAIA JET DUO — 후방 2.5D 테스트</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#051b36;color:white;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}#shell{position:fixed;inset:0;overflow:hidden;background:#0b5793}canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;inset:0;pointer-events:none}#top{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) 18px 0;text-shadow:0 2px 9px #00142d}#badge{background:linear-gradient(145deg,#1c326bce,#0a3f65bc);border:1px solid #82e8ff88;border-radius:15px;padding:9px 15px;box-shadow:0 4px 20px #0018;min-width:184px}#brand{font-weight:900;font-style:italic;letter-spacing:1.6px;font-size:19px;color:#d8fbff}#sub{font-size:10px;letter-spacing:2px;color:#a5f8ff;font-weight:800}#speed{font-size:32px;line-height:1;font-weight:1000;letter-spacing:-1px;margin-top:6px}#speed small{font-size:11px;letter-spacing:0;color:#b9e5ff;margin-left:4px}#centerstats{text-align:center;background:#07284ca8;border:1px solid #a4ebff55;padding:8px 16px;border-radius:12px;min-width:176px;backdrop-filter:blur(4px)}#centerstats strong{display:block;color:#fff;font-size:17px}#centerstats span{font-size:11px;color:#b5ebfa}#righttop{display:flex;gap:8px;align-items:flex-start;pointer-events:auto}button{font-family:inherit;color:white;border:1px solid #b7f8ff76;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}#full,#reset{background:#09294ac9;border-radius:11px;font-size:12px;font-weight:900;padding:12px 13px;box-shadow:0 4px 18px #0017}#full:active,#reset:active{background:#32a8c9}
+#mapwrap{position:absolute;top:84px;right:16px;width:112px;height:150px;background:#072c51aa;border:1px solid #6bdaff8a;border-radius:12px;padding:6px;box-shadow:0 4px 22px #0038}#map{width:100%;height:100%}#maptitle{position:absolute;bottom:5px;left:0;right:0;text-align:center;color:#a6ecff;font-size:9px;font-weight:800;letter-spacing:1.5px}
+#themeSwitch{background:#075b77d9;border-radius:11px;font-size:12px;font-weight:900;padding:12px 13px;box-shadow:0 4px 18px #0017;white-space:nowrap}#themeSwitch:active{background:#28b5c6}
+#toast{position:absolute;top:30%;left:50%;transform:translateX(-50%);padding:8px 17px;border-radius:16px;background:#043c60b8;border:1px solid #b3f3ff88;box-shadow:0 3px 25px #0036;color:#fff;font-weight:700;font-size:13px;white-space:nowrap;text-align:center;opacity:0;transition:opacity .25s}#toast.show{opacity:1}
+#controls{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 15px);left:calc(env(safe-area-inset-left) + 22px);right:calc(env(safe-area-inset-right) + 22px);display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}#steer,#actions{display:flex;gap:12px;pointer-events:auto}.btn{width:88px;height:86px;border-radius:25px;font-size:36px;font-weight:1000;background:linear-gradient(140deg,#bbf8ff80,#026facac);border:2px solid #c0ffffb9;box-shadow:inset 0 2px 0 #fff5,0 6px 0 #072f4e,0 10px 20px #0019;text-shadow:0 2px 5px #005a80}.btn:active,.btn.pressed{transform:translateY(5px);box-shadow:inset 0 2px 9px #014660,0 2px 0 #072f4e;background:#6ce8fc}.btn.jump{border-radius:50%;background:linear-gradient(140deg,#ff9bd4,#a946b8);border-color:#ffd7f2;font-size:15px;letter-spacing:.3px}.btn.boost{border-radius:50%;background:linear-gradient(140deg,#ffec9a,#e08723);border-color:#fff9b6;color:#452007;text-shadow:none;font-size:15px}.btn span{display:block;font-size:11px;line-height:1.2}.hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 112px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:#dcffffce;text-shadow:0 2px 7px #003;white-space:nowrap}
+.fire-stack{display:flex;flex-direction:column;gap:5px;justify-content:flex-end}.fire-stack .btn{height:40px;width:88px;border-radius:18px;font-size:13px;line-height:1.05}.fire-stack .btn span{font-size:10px}.btn.fire-front{background:linear-gradient(145deg,#9bf4ff,#1686c4);border-color:#c3ffff}.btn.fire-rear{background:linear-gradient(145deg,#edbaff,#8c5dca);border-color:#f6d6ff}
+#intro{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(#001c388a,#00132cb7);backdrop-filter:blur(2px);pointer-events:auto;padding:20px}#intro.hidden{display:none}.card{max-width:480px;width:min(94%,480px);background:linear-gradient(140deg,#104b7dee,#082b59f5);border:1px solid #85e8ffbb;border-radius:25px;box-shadow:0 20px 60px #001a;padding:26px;text-align:center}.card .tag{font-size:11px;color:#9ffff1;font-weight:900;letter-spacing:3px}.card h1{font-style:italic;font-size:clamp(25px,5vw,40px);line-height:1.05;margin:10px 0;color:white;text-shadow:0 4px 0 #006899}.card p{font-size:14px;line-height:1.6;color:#ceeef8}.card small{display:block;color:#9fd6ec;font-size:11px;margin:9px 0 15px}.card button{background:linear-gradient(140deg,#55efef,#28a1d3);border:2px solid #bbffff;border-radius:30px;padding:13px 32px;color:#062b5a;font-weight:1000;font-size:17px;box-shadow:0 5px 0 #085575}#copyright{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;font-size:9px;color:#def7ff99;white-space:nowrap}
+@media(max-width:650px){#top{padding:8px 9px 0;gap:5px}#badge{min-width:118px;padding:7px 9px}#brand{font-size:12px}#sub{font-size:8px;letter-spacing:1px}#speed{font-size:24px}#centerstats{min-width:93px;padding:7px}#centerstats strong{font-size:13px}#centerstats span{font-size:9px}#full,#reset,#themeSwitch{padding:9px 8px;font-size:10px}#righttop{gap:4px}#controls{left:10px;right:10px;bottom:13px}#steer,#actions{gap:7px}.btn{width:69px;height:65px;border-radius:18px;font-size:27px}.btn.jump,.btn.boost{font-size:12px}.hint{bottom:84px;font-size:9px}#mapwrap{top:69px;width:86px;height:106px;right:8px}}@media(max-height:460px){#mapwrap{top:62px;width:90px;height:98px}.btn{width:69px;height:62px}.hint{bottom:84px}#controls{bottom:12px}}
+@media(max-width:650px){.fire-stack{gap:4px}.fire-stack .btn{width:69px;height:30px;font-size:11px}.fire-stack .btn span{font-size:9px}}@media(max-width:380px){#actions,#steer{gap:4px}.btn{width:61px;height:59px}.fire-stack .btn{width:61px;height:27px}.hint{font-size:8px}}
+</style>
+</head>
+<body>
+<div id="shell">
+<canvas id="race" aria-label="후방 시점 레이싱 경기장"></canvas>
+<div id="hud">
+ <div id="top">
+  <div id="badge"><div id="sub">PERSPECTIVE TEST / 2.5D</div><div id="brand">GAIA JET DUO</div><div id="speed">000 <small>KM/H</small></div></div>
+  <div id="centerstats"><strong id="lap">COURSE TEST</strong><span id="distance">거리 0 / 5,000m</span></div>
+  <div id="righttop"><button id="themeSwitch" type="button">풍경: 기본</button><button id="reset" type="button">↺ 다시</button><button id="full" type="button">⛶ 전체화면</button></div>
+ </div>
+ <div id="mapwrap"><canvas id="map" aria-label="2D 코스 미니맵"></canvas><div id="maptitle">TOP VIEW MAP</div></div>
+ <div id="toast"></div>
+ <div class="hint">좌우 · JUMP · BOOST · FIRE ▲ 전방 / ▼ 후방</div>
+ <div id="controls"><div id="steer"><button class="btn" id="left" aria-label="왼쪽" type="button">◀</button><button class="btn" id="right" aria-label="오른쪽" type="button">▶</button></div><div id="actions"><div class="fire-stack"><button class="btn fire-front" id="fireFront" type="button">FIRE ▲<span>전방</span></button><button class="btn fire-rear" id="fireRear" type="button">FIRE ▼<span>후방</span></button></div><button class="btn jump" id="jump" type="button">JUMP<span>점프</span></button><button class="btn boost" id="boost" type="button">BOOST<span>가속</span></button></div></div>
+ <div id="copyright">2.5D 시점 · 수면 애니메이션 · 부표/기체 충돌 적용 · 공격 판정 미적용</div>
+</div>
+<div id="intro"><div class="card"><div class="tag">GAIA PROJECT / BACKGROUND TEST</div><h1>JET DUO<br>BEHIND VIEW</h1><p>오른쪽 위 '풍경' 버튼으로 하늘과 물을 함께 전환합니다.</p><small>기본 · 도시/강 · 해변/에메랄드 · 돔/인공 수로</small><button id="start">테스트 시작</button></div></div>
+</div>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('race'),ctx=canvas.getContext('2d',{alpha:false});
+const mini=document.getElementById('map'),mc=mini.getContext('2d');
+const speedEl=document.getElementById('speed'),distEl=document.getElementById('distance'),lapEl=document.getElementById('lap');
+const COURSE=5000,LANE=210,keys={left:false,right:false,fireFront:false,fireRear:false};
+let w=960,h=600,dpr=1,mode='ready',last=performance.now(),elapsed=0,visualTime=0,toastTimer=0,shake=0;
+const BASE_SPEED=184,BOOST_DURATION=2.25,BOOST_EXTRA=170;
+const WAVE_START=490,WAVE_SPACING=570,WAVE_DURATION=1.27;
+const INERTIA={turn:3.6,release:1.35};
+const player={s:0,lane:0,speed:0,lean:0,air:0,boost:0,steer:0,sideVel:0,fire:0,fireMode:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0};
+const bots=[{s:620,lane:-80,speed:142,cruise:142,col:'#ff7ad8',wave:.2,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0},{s:990,lane:90,speed:161,cruise:161,col:'#ffe483',wave:1.3,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0},{s:1470,lane:10,speed:151,cruise:151,col:'#a8f85f',wave:2.7,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0}];
+const hitBuoys=new Set(),buoyReactions=new Map();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const ASSET_ROOT='assets/';
+const assetFiles={straight:'player-straight.webp',left:'player-left.webp',right:'player-right.webp',fireStraight:'player-fire-straight.webp',fireLeft:'player-fire-left.webp',fireRight:'player-fire-right.webp',frontStraight:'player-front-fire-straight.webp',frontLeft:'player-front-fire-left.webp',frontRight:'player-front-fire-right.webp',dummy:'dummy-movement.webp',rear:'splash-rear.webp',side:'splash-side.webp',water:'water-texture.webp',canalWater:'water-canal-clear.webp',riverWater:'water-river-muted.webp',beachWater:'water-beach-emerald.webp',citySky:'scenery-city-river.webp',beachSky:'scenery-beach.webp',domeSky:'scenery-artificial-dome.webp',buoys:'buoys-pink-yellow.webp',shadow:'shadow-feather.png',waveFront:'wave-front.png'};
+const themes=[
+ {label:'기본',water:'water',sky:null,palette:['#1b9eb9','#0b709e','#045078']},
+ {label:'도시+강',water:'riverWater',sky:'citySky',palette:['#337d80','#216d72','#17565d'],cropBottom:.835},
+ {label:'해변',water:'beachWater',sky:'beachSky',palette:['#11b9b4','#04ad9e','#007b83'],cropBottom:.858},
+ {label:'인공 돔',water:'canalWater',sky:'domeSky',palette:['#25b5d7','#1796c8','#0876a7'],cropBottom:.838}
+];
+let themeIndex=0;
+const art={};
+for(const [id,file] of Object.entries(assetFiles)){const img=new Image();img.decoding='async';img.src=ASSET_ROOT+file;art[id]=img}
+function ready(id){const img=art[id];return img&&img.complete&&img.naturalWidth>0}
+function softShadow(x,y,rx,ry,opacity=1){
+ if(ready('shadow')){ctx.save();ctx.globalAlpha=clamp(opacity,0,1);ctx.drawImage(art.shadow,x-rx,y-ry,rx*2,ry*2);ctx.restore();return}
+ ctx.save();ctx.globalAlpha=opacity*.3;ctx.fillStyle='#01263a';ctx.beginPath();ctx.ellipse(x,y,rx*.68,ry*.65,0,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+function spriteFrame(lean){return lean<-.22?1:lean>.22?2:0}
+function jetBob(phase,speed){
+ const pace=1.35+clamp(speed,0,265)*.009;
+ const height=7-clamp(speed/265,0,1)*3;
+ return Math.sin(visualTime*pace+phase)*height+Math.sin(visualTime*pace*1.67+phase*2.2)*1.35;
+}
+// The crest's course coordinate is used by both perspective rendering and the craft response.
+function waveCenter(index,lane){return WAVE_START+index*WAVE_SPACING+14*Math.sin(index*.81+lane/155)}
+function swellAt(s,lane){
+ const i=Math.max(0,Math.round((s-WAVE_START)/WAVE_SPACING));
+ const d=(s-waveCenter(i,lane))/95;
+ return Math.exp(-d*d*1.5);
+}
+function waveMotion(phase,power){
+ if(phase<=0)return {lift:0,submerge:0,splash:0};
+ if(phase<.52)return {lift:-Math.sin(Math.PI*phase/.52)*(24+48*power),submerge:0,splash:0};
+ if(phase<.79){const dip=Math.sin(Math.PI*(phase-.52)/.27);return {lift:dip*(19+25*power),submerge:dip*power,splash:dip};}
+ if(phase<1.15)return {lift:-Math.sin(Math.PI*(phase-.79)/.36)*(11+17*power),submerge:0,splash:(1-(phase-.79)/.36)*.28};
+ return {lift:0,submerge:0,splash:0};
+}
+function waveRibbons(){
+ const first=Math.max(0,Math.floor((player.s+35-WAVE_START)/WAVE_SPACING));
+ const last=Math.floor((player.s+2350-WAVE_START)/WAVE_SPACING);
+ for(let i=last;i>=first;i--){
+  const z=waveCenter(i,0)-player.s;if(z<35||z>2350)continue;
+  const crest=[],trough=[];
+  for(let j=0;j<=32;j++){
+   const off=LANE*2.05*(j/16-1),p=proj(waveCenter(i,off)-player.s,off),sc=clamp(p.sc,0,7);
+   const ripple=.86+.14*Math.sin(j*.64+i*1.8);
+   crest.push([p.x,p.y-clamp(sc*5.1,1.1,32)*ripple]);
+   trough.push([p.x,p.y+clamp(sc*3.6,1.3,21)]);
+  }
+  const nearSc=clamp(proj(z,0).sc,0,7),fade=clamp(nearSc*.27,.28,.90);
+  ctx.save();ctx.globalAlpha=fade;
+  const grad=ctx.createLinearGradient(0,crest[16][1],0,trough[16][1]);
+  grad.addColorStop(0,'#d6ffffa5');grad.addColorStop(.23,'#76d5e7a2');grad.addColorStop(.66,'#077eabd1');grad.addColorStop(1,'#035b8900');
+  poly(crest.concat(trough.reverse()),grad);
+  ctx.strokeStyle='#d6ffff';ctx.lineCap='round';ctx.lineWidth=clamp(nearSc*.52,.7,3.2);
+  ctx.globalAlpha=fade*.65;
+  for(let j=1;j<30;j+=5){ctx.beginPath();ctx.moveTo(crest[j][0],crest[j][1]);ctx.lineTo(crest[j+1][0],crest[j+1][1]);ctx.lineTo(crest[j+2][0],crest[j+2][1]);ctx.stroke();}
+  ctx.restore();
+ }
+}
+function drawMovingWater(hy){
+ const waterId=themes[themeIndex].water;
+ if(!ready(waterId))return;
+ const img=art[waterId],waterH=h-hy,bandSize=30;
+ ctx.save();ctx.beginPath();ctx.rect(0,hy,w,waterH);ctx.clip();ctx.globalAlpha=.78;
+ for(let yy=0;yy<waterH;yy+=bandSize){
+  const band=Math.min(bandSize,waterH-yy),sy=yy/waterH*img.naturalHeight,sh=band/waterH*img.naturalHeight;
+  const ripple=4.3*Math.sin(visualTime*(1.3+player.speed*.002)+yy*.015)+2.2*Math.sin(visualTime*.72+yy*.008);
+  ctx.drawImage(img,0,sy,img.naturalWidth,sh,-10+ripple,hy+yy,w+20,band+.6);
+ }
+ ctx.restore();
+}
+function drawWaterSheet(id,frame,x,y,width,height,opacity,flipped=false){
+ if(!ready(id)||opacity<=0)return;
+ const img=art[id],split=id==='rear'?[0,940,1610,2172]:[0,890,1610,2172],srcX=split[frame],srcW=split[frame+1]-srcX,k=img.naturalWidth/2172;
+ ctx.save();ctx.globalAlpha=clamp(opacity,0,1);ctx.translate(x,y);if(flipped)ctx.scale(-1,1);
+ ctx.drawImage(img,srcX*k,0,srcW*k,img.naturalHeight,-width*.5,-height*.5,width,height);ctx.restore();
+}
+function wakeArt(x,bottom,jetHeight,lean,airFactor=0,landing=0,boost=0,small=false){
+ const keep=airFactor>0?.04:1,eff=jetHeight*(small?.88:1),f=1+.22*Math.sin(visualTime*18);
+ const rearWidth=eff*(landing>0?1.35:.97),rearHeight=eff*.62;
+ // 물보라 원본 세 크기를 합성하면서 시인성을 소폭 높인다.
+ drawWaterSheet('rear',landing>0?0:1,x,bottom-eff*.07,rearWidth,rearHeight,keep*(landing>0?.60:.28));
+ drawWaterSheet('rear',2,x+Math.sin(visualTime*11)*3,bottom+eff*.01,eff*.72,eff*.38,keep*(boost>0?.45:.23)*f);
+ if(Math.abs(lean)>.14){const sideRight=lean>0;drawWaterSheet('side',boost>0?0:1,x+(sideRight?1:-1)*eff*.44,bottom-eff*.28,eff*.78,eff*.66,keep*(.24+Math.abs(lean)*.28),sideRight)}
+}
+function center(s){return 94*Math.sin(s/530)+59*Math.sin(s/1170)+44*Math.sin(s/260)}
+function slope(s){return 94/530*Math.cos(s/530)+59/1170*Math.cos(s/1170)+44/260*Math.cos(s/260)}
+function resize(){const r=canvas.getBoundingClientRect();w=Math.max(320,r.width);h=Math.max(220,r.height);dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const m=mini.getBoundingClientRect();mini.width=Math.max(40,Math.round(m.width*2));mini.height=Math.max(40,Math.round(m.height*2));mc.setTransform(2,0,0,2,0,0)}
+window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{last=performance.now()});resize();
+function reset(){
+ Object.assign(player,{s:0,lane:0,speed:0,lean:0,air:0,boost:0,steer:0,sideVel:0,fire:0,fireMode:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0});
+ elapsed=0;visualTime=0;shake=0;hitBuoys.clear();buoyReactions.clear();
+ [620,990,1470].forEach((s,i)=>{Object.assign(bots[i],{s,lane:[-80,90,10][i],speed:bots[i].cruise,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0})});
+ mode='running';lapEl.textContent='COURSE TEST';document.getElementById('intro').classList.add('hidden');say('부표·기체 충돌 테스트',1.6)
+}
+function say(t,d=1.5){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');toastTimer=d}
+document.getElementById('start').onclick=reset;document.getElementById('reset').onclick=reset;
+document.getElementById('themeSwitch').onclick=()=>{themeIndex=(themeIndex+1)%themes.length;document.getElementById('themeSwitch').textContent='풍경: '+themes[themeIndex].label};
+document.getElementById('full').onclick=()=>{if(!document.fullscreenElement){document.getElementById('shell').requestFullscreen?.().catch(()=>say('기기에서 전체화면이 제한됩니다'))}else document.exitFullscreen?.()};
+function btnHold(id,key){const el=document.getElementById(id);function on(e){e.preventDefault();keys[key]=true;el.classList.add('pressed');try{el.setPointerCapture(e.pointerId)}catch(_){}}function off(e){e.preventDefault();keys[key]=false;el.classList.remove('pressed')}el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',()=>{keys[key]=false;el.classList.remove('pressed')})}
+btnHold('left','left');btnHold('right','right');
+btnHold('fireFront','fireFront');btnHold('fireRear','fireRear');
+function jump(){if(mode!=='running')return;if(player.air<=0){player.air=1.15;player.wavePhase=0;say('JUMP!',.55)}}
+function boost(){
+ if(mode!=='running')return;
+ player.boost=BOOST_DURATION;
+ // Immediate punch followed by an easing speed target; gauge UI can bind to boost later.
+ player.speed=Math.min(365,Math.max(315,player.speed+128));
+ say('BOOST!',.65);
+}
+document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
+document.getElementById('boost').addEventListener('pointerdown',e=>{e.preventDefault();boost()});
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp',' ','Shift','j','J','k','K'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft')keys.left=true;if(e.key==='ArrowRight')keys.right=true;if(e.key==='j'||e.key==='J')keys.fireRear=true;if(e.key==='k'||e.key==='K')keys.fireFront=true;if((e.key===' '||e.key==='ArrowUp')&&!e.repeat)jump();if(e.key==='Shift'&&!e.repeat)boost();if(e.key==='Enter'&&mode!=='running')reset()});
+window.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keys.left=false;if(e.key==='ArrowRight')keys.right=false;if(e.key==='j'||e.key==='J')keys.fireRear=false;if(e.key==='k'||e.key==='K')keys.fireFront=false});
+// Swept 2D ellipse, including movement during the frame, to avoid high-speed tunneling.
+function pathHit(ps0,pl0,ps1,pl1,os0,ol0,os1,ol1,lengthRadius,laneRadius){
+ const a=(ps0-os0)/lengthRadius,b=(pl0-ol0)/laneRadius;
+ const da=(ps1-os1)/lengthRadius-a,db=(pl1-ol1)/laneRadius-b;
+ const t=clamp(-(a*da+b*db)/Math.max(.0000001,da*da+db*db),0,1);
+ return (a+da*t)**2+(b+db*t)**2<1;
+}
+function registerHit(kind,direction,target){
+ player.hitCooldown=.72;player.impact=.5;player.hitLean=direction;
+ player.speed=Math.max(33,player.speed*(kind==='buoy'?.63:.70));
+ player.knock=direction*(kind==='buoy'?220:310);
+ shake=kind==='buoy'?11:13;
+ if(kind==='buoy'){
+  hitBuoys.add(target);buoyReactions.set(target,{at:visualTime,side:direction});say('부표 충돌! 감속',.75);
+ }else{
+  const longitudinal=player.s<=target.s?-1:1;
+  player.knockLong=longitudinal*145;
+  target.knockLong=-longitudinal*120;
+  target.speed=Math.max(35,target.speed*.76);
+  target.knock=-direction*255;target.hitLean=-direction;
+  target.hitCooldown=.72;target.impact=.62;say('기체 충돌! 양쪽 넉백',.75);
+ }
+}
+function resolveCollisions(oldS,oldLane,oldBots){
+ if(player.air>.12||(player.wavePhase>0&&player.wavePhase<.52)||player.hitCooldown>0)return;
+ const first=Math.max(1,Math.floor((oldS-45)/210)),last=Math.ceil((player.s+45)/210);
+ for(let i=first;i<=last;i++){
+  const at=i*210;if(hitBuoys.has(at))continue;
+  const side=i%2===0?-1:1,bx=side*(LANE+16);
+  if(pathHit(oldS,oldLane,player.s,player.lane,at,bx,at,bx,43,77)){
+   registerHit('buoy',-side,at);return;
+  }
+ }
+ for(let i=0;i<bots.length;i++){
+  const b=bots[i],prev=oldBots[i];if(b.hitCooldown>0)continue;
+  if(pathHit(oldS,oldLane,player.s,player.lane,prev.s,prev.lane,b.s,b.lane,61,67)){
+   // When perfectly aligned, separate the pair according to relative steering.
+   const direction=player.lane<b.lane?-1:player.lane>b.lane?1:(player.steer<0?-1:1);
+   registerHit('craft',direction,b);return;
+  }
+ }
+}
+function update(dt){
+ if(mode!=='running')return;
+ elapsed+=dt;
+ const oldS=player.s,oldLane=player.lane,oldBots=bots.map(b=>({s:b.s,lane:b.lane}));
+ const steerv=(keys.right?1:0)-(keys.left?1:0);
+ player.steer+=(steerv-player.steer)*Math.min(1,dt*7);
+ player.lean+=(steerv-player.lean)*Math.min(1,dt*4.5);
+ player.boost=Math.max(0,player.boost-dt);
+ player.hitCooldown=Math.max(0,player.hitCooldown-dt);
+ player.impact=Math.max(0,player.impact-dt);
+ const wasAir=player.air;player.air=Math.max(0,player.air-dt);
+ if(wasAir>0&&player.air===0)player.landing=.55;
+ player.landing=Math.max(0,player.landing-dt);
+ if(player.wavePhase>0){player.wavePhase+=dt;if(player.wavePhase>=WAVE_DURATION)player.wavePhase=0;}
+ const shot=keys.fireFront?1:keys.fireRear?2:0;
+ if(shot){player.fireMode=shot;player.fire=.2}else player.fire=Math.max(0,player.fire-dt);
+ const boostFraction=clamp(player.boost/BOOST_DURATION,0,1);
+ const target=BASE_SPEED+BOOST_EXTRA*boostFraction*boostFraction;
+ player.speed+=(target-player.speed)*Math.min(1,dt*(player.boost>0?3.7:1.1));
+ const v=player.speed;
+ const profile=INERTIA;
+ const speedSlip=clamp((v-BASE_SPEED)/170,0,1);
+ const turning=steerv!==0;
+ const opposite=turning&&player.sideVel*steerv<0;
+ const response=(turning?profile.turn:profile.release)*(1-speedSlip*.25)*(opposite?.78:1);
+ const desiredSide=player.steer*(86+v*.56)/(1+speedSlip*.26);
+ player.sideVel+=(desiredSide-player.sideVel)*(1-Math.exp(-dt*response));
+ player.s+=(v/3.6*5.2+player.knockLong)*dt;
+ player.knockLong*=Math.exp(-dt*5);
+ player.lane+=(player.sideVel+player.knock)*dt;
+ player.knock*=Math.exp(-dt*5);
+ player.lane-=slope(player.s)*dt*v*.85;
+ const uncheckedLane=player.lane;
+ player.lane=clamp(uncheckedLane,-LANE+25,LANE-25);
+ if(uncheckedLane!==player.lane&&Math.sign(player.sideVel)===Math.sign(uncheckedLane))player.sideVel*=-.16;
+ if(player.wavePhase===0&&player.air<=0&&v>=125){
+  const i=Math.round((player.s-WAVE_START)/WAVE_SPACING);
+  if(i>=0){const crest=waveCenter(i,player.lane);
+   if(oldS<crest&&player.s>=crest){player.wavePhase=.001;player.wavePower=clamp((v-105)/230,.35,1);}
+  }
+ }
+ for(const b of bots){
+  b.speed+=(b.cruise-b.speed)*Math.min(1,dt*.7);
+  b.hitCooldown=Math.max(0,b.hitCooldown-dt);
+  b.impact=Math.max(0,b.impact-dt);
+  b.s+=(b.speed/3.6*5.2+b.knockLong)*dt;
+  b.knockLong*=Math.exp(-dt*4.5);
+  b.lane=clamp(b.lane+(Math.sin(elapsed*.8+b.wave)*12+b.knock)*dt,-150,150);
+  b.knock*=Math.exp(-dt*4);
+ }
+ resolveCollisions(oldS,oldLane,oldBots);
+ if(Math.abs(player.lane)>=LANE-27){player.speed*=1-dt*.45;shake=Math.min(11,shake+dt*15)}
+ else shake=Math.max(0,shake-dt*16);
+ for(const [at,reaction] of buoyReactions)if(visualTime-reaction.at>1.2)buoyReactions.delete(at);
+ if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)document.getElementById('toast').classList.remove('show')}
+ if(player.s>=COURSE){player.s=COURSE;mode='done';lapEl.textContent='TEST COMPLETE';say('코스 완주! 다시 버튼으로 재시작',1000)}
+ speedEl.innerHTML=Math.round(player.speed).toString().padStart(3,'0')+' <small>KM/H</small>';
+ distEl.textContent='거리 '+Math.round(player.s).toLocaleString()+' / 5,000m';
+}
+function poly(points,fill,stroke,width=1){if(points.length<2)return;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=width;ctx.strokeStyle=stroke;ctx.stroke()}}
+function line(points,color,width=1){ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+function proj(z,off=0){const near=104,foc=w*.98,depth=z+near,relative=center(player.s+z)-center(player.s)-slope(player.s)*z+off-player.lane,focus=clamp(1150/(z+450),.55,1);const sc=foc/depth;return{x:w*.5+relative*sc*focus,y:h*.21+(h*127)/depth,sc}}
+function background(){const hy=h*.21,theme=themes[themeIndex];
+if(theme.sky&&ready(theme.sky)){
+ const img=art[theme.sky],srcH=Math.min(img.naturalHeight,img.naturalWidth*hy/w),srcBottom=img.naturalHeight*theme.cropBottom;
+ const srcTop=clamp(srcBottom-srcH,0,img.naturalHeight-srcH);
+ // Preserve horizontal proportions of the painted panorama in the narrow horizon strip.
+ ctx.drawImage(img,0,srcTop,img.naturalWidth,srcH,0,0,w,hy+1);
+}else{
+ const sky=ctx.createLinearGradient(0,0,0,h*.47);sky.addColorStop(0,'#0575b6');sky.addColorStop(.55,'#6fcef1');sky.addColorStop(1,'#e5fbf3');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+ ctx.globalAlpha=.54;ctx.fillStyle='#fff9dd';ctx.beginPath();ctx.arc(w*.73,h*.12,Math.min(55,w*.06),0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.fillStyle='#306f89';ctx.beginPath();ctx.moveTo(0,hy);for(let x=0;x<=w+12;x+=12){const y=hy-8-16*Math.sin(x*.005+2)-13*Math.sin(x*.018+1);ctx.lineTo(x,y)}ctx.lineTo(w,hy+20);ctx.lineTo(0,hy+20);ctx.fill();
+}
+const water=ctx.createLinearGradient(0,hy,0,h);water.addColorStop(0,theme.palette[0]);water.addColorStop(.42,theme.palette[1]);water.addColorStop(1,theme.palette[2]);ctx.fillStyle=water;ctx.fillRect(0,hy,w,h-hy);
+drawMovingWater(hy);
+ctx.save();ctx.strokeStyle='#bafaff40';for(let k=0;k<45;k++){const frac=((k*37+elapsed*(20+player.speed*.34))%500)/500;const y=hy+frac*frac*(h-hy);ctx.globalAlpha=.09+.32*frac;ctx.lineWidth=1+frac*1.5;ctx.beginPath();for(let j=0;j<7;j++){const x=(k*263+j*191+Math.sin(k*1.2)*90)%w;ctx.moveTo(x,y+j%2*3);ctx.lineTo(x+13+frac*48,y+j%2*3)}ctx.stroke()}ctx.restore();
+// Sparse near-water streaks add motion without changing the illustrated water texture.
+const rush=clamp((player.speed-145)/205,0,1);
+if(rush>.02){ctx.save();ctx.strokeStyle='#d0ffff';ctx.lineCap='round';for(let i=0;i<14;i++){
+ const phase=((visualTime*(.48+player.speed/225)+i*.197)%1),y=hy+Math.pow(phase,1.55)*(h-hy);
+ const x=((i*229+63)%Math.max(1,w)),len=(12+phase*110)*rush;
+ ctx.globalAlpha=(.035+.15*phase)*rush;ctx.lineWidth=1+phase*1.8;
+ ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(i%2?1:-1)*len*.12,y+len);ctx.stroke();
+}ctx.restore()}}
+function road(){const far=2400,step=32,segments=[];for(let z=far;z>=55;z-=step)segments.push({z,l:proj(z,-LANE),r:proj(z,LANE),c:proj(z,0)});for(let i=0;i<segments.length-1;i++){const a=segments[i],b=segments[i+1];const t=clamp((b.c.y-h*.21)/(h*.79),0,1);const bright=(Math.floor((player.s+a.z)/170)%2===0)?1:0;poly([[a.l.x,a.l.y],[a.r.x,a.r.y],[b.r.x,b.r.y],[b.l.x,b.l.y]],bright?'#2ec9db55':'#26b4d155');
+if(i%3===0){const f=clamp(t*.7,.05,.6);line([[a.l.x,a.l.y],[b.l.x,b.l.y]],'#d5ffff'+Math.round(f*255).toString(16).padStart(2,'0'),Math.max(1,2*t));line([[a.r.x,a.r.y],[b.r.x,b.r.y]],'#d5ffff'+Math.round(f*255).toString(16).padStart(2,'0'),Math.max(1,2*t))}}
+ctx.save();ctx.strokeStyle='#c5ffff';for(let i=0;i<segments.length-1;i+=4){const a=segments[i],b=segments[i+1];ctx.globalAlpha=clamp((b.c.y-h*.21)/(h*.5),.06,.4);ctx.lineWidth=1+3*clamp((b.c.y-h*.21)/(h*.6),0,1);line([[a.l.x,a.l.y],[b.l.x,b.l.y]],'#e4ffff',ctx.lineWidth);line([[a.r.x,a.r.y],[b.r.x,b.r.y]],'#e4ffff',ctx.lineWidth)}ctx.restore();
+// Gentle elevated water ridges share their world position with the buoyancy response.
+waveRibbons();
+// 원근 깊이순: 멀리 있는 작은 부표를 먼저, 가까운 큰 부표를 나중에 그린다.
+const firstBuoy=Math.ceil((player.s+60)/210)*210,lastBuoy=Math.floor((player.s+2399)/210)*210;
+for(let s=lastBuoy;s>=firstBuoy;s-=210){const z=s-player.s,side=Math.floor(s/210)%2===0?-1:1;const p=proj(z,side*(LANE+16));if(p.y<h*.21||p.y>h+100)continue;const size=clamp(38*p.sc,3,36);buoy(p.x,p.y,size,side,s)}
+for(let s=Math.ceil((player.s+70)/120)*120;s<player.s+2000;s+=120){const z=s-player.s,p=proj(z,-LANE*.18);if(p.y>h)continue;const width=clamp(p.sc*15,1,28);ctx.globalAlpha=.18;ctx.strokeStyle='#fff';ctx.lineWidth=width*.15;ctx.beginPath();ctx.ellipse(p.x,p.y,Math.max(2,width),Math.max(1,width*.12),0,0,Math.PI);ctx.stroke();ctx.globalAlpha=1}}
+function buoy(x,y,sz,side,at){
+ softShadow(x+3,y+sz*.07,sz*1.18,Math.max(2,sz*.35),.86);
+ ctx.save();ctx.translate(x,y);
+ const floatY=Math.sin(visualTime*1.55+x*.009)*Math.min(2.6,sz*.07);
+ ctx.translate(0,floatY);
+ const hit=buoyReactions.get(at);
+ if(hit){const age=visualTime-hit.at;ctx.rotate(Math.sin(age*23)*Math.exp(-age*5)*hit.side*.24)}
+ if(ready('buoys')){
+  const img=art.buoys,cell=img.naturalWidth/2,srcX=side===-1?0:cell,drawSz=sz*2.2;
+  ctx.drawImage(img,srcX,0,cell,img.naturalHeight,-drawSz*.5,-drawSz,drawSz,drawSz);
+ }else{
+  ctx.fillStyle=side===-1?'#ff507b':'#ffe07e';ctx.beginPath();ctx.moveTo(0,-sz*1.5);ctx.lineTo(sz*.43,-sz*.55);ctx.lineTo(sz*.5,0);ctx.quadraticCurveTo(0,sz*.26,-sz*.5,0);ctx.lineTo(-sz*.43,-sz*.55);ctx.closePath();ctx.fill();ctx.fillStyle='#fffbd4';ctx.fillRect(-sz*.3,-sz*.46,sz*.6,sz*.15);
+ }ctx.restore();
+}
+function craft(x,y,size,color,lean,shadow=true,air=0){
+ if(shadow)softShadow(x,y+size*.33,size*.68,size*.2,air>0?.35:.83);
+ ctx.save();ctx.translate(x,y-air);ctx.rotate(lean*.11);const sc=clamp(size/84,.05,3);ctx.scale(sc,sc);
+ctx.fillStyle='#e0ffffb5';ctx.beginPath();ctx.ellipse(0,34,55,8,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#072e56';poly([[-37,20],[-26,-28],[-15,-54],[0,-66],[15,-54],[26,-28],[37,20],[18,30],[-18,30]],'#032849');
+ctx.fillStyle=color;poly([[-31,16],[-21,-24],[-9,-49],[0,-54],[9,-49],[21,-24],[31,16],[15,25],[-15,25]],color);
+ctx.fillStyle='#e9fcff';ctx.globalAlpha=.5;poly([[-8,-47],[0,-55],[8,-47],[11,-24],[-11,-24]],'#fff');ctx.globalAlpha=1;
+// passenger (back seat)
+ctx.fillStyle='#272353';ctx.beginPath();ctx.ellipse(0,3,23,18,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fa8fc9';ctx.beginPath();ctx.ellipse(0,-2,18,17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffc6a5';ctx.beginPath();ctx.arc(0,-16,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#61408d';ctx.beginPath();ctx.arc(0,-19,13,Math.PI,Math.PI*2);ctx.fill();ctx.fillRect(-13,-19,5,13);
+// driver (front seat)
+ctx.fillStyle='#16355b';ctx.beginPath();ctx.ellipse(0,-29,18,16,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#6de5eb';ctx.beginPath();ctx.ellipse(0,-31,14,14,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f3b994';ctx.beginPath();ctx.arc(0,-46,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='#392e63';ctx.beginPath();ctx.arc(0,-49,11,Math.PI,Math.PI*2);ctx.fill();
+ctx.strokeStyle='#f2c4a8';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-12,-33);ctx.lineTo(-22,-25);ctx.moveTo(12,-33);ctx.lineTo(22,-25);ctx.stroke();ctx.strokeStyle='#17294d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-28,-25);ctx.lineTo(28,-25);ctx.stroke();ctx.restore()}
+function rivals(){
+ const visible=bots.map(b=>({...b,z:b.s-player.s})).filter(b=>b.z>60&&b.z<2400).sort((a,b)=>b.z-a.z);
+ for(const b of visible){
+  const p=proj(b.z,b.lane);if(p.y<h*.26||p.y>h+110)continue;
+  const size=clamp(p.sc*90,6,180),lean=Math.sin(elapsed*2+b.wave)*.7;
+  if(ready('dummy')){
+   const jetSide=size*1.38,botBottom=p.y+size*.36,frame=spriteFrame(lean),cell=art.dummy.naturalWidth/3;
+   const waveRise=swellAt(b.s,b.lane)*Math.min(17,jetSide*.055);
+   softShadow(p.x,botBottom-jetSide*.04,jetSide*.47,Math.max(2,jetSide*.11),.78-waveRise*.012);
+   wakeArt(p.x,botBottom,jetSide,lean,waveRise,b.impact,0,true);
+   const bob=jetBob(b.wave,b.speed)*clamp(jetSide/390,.25,.8),hitIntensity=clamp(b.impact/.62,0,1);
+   const roll=lean*.013+Math.sin(visualTime*2+b.wave)*.009+Math.sin(visualTime*26+b.wave)*hitIntensity*.095+b.hitLean*hitIntensity*.16;
+   ctx.save();ctx.translate(p.x+b.hitLean*hitIntensity*size*.11,botBottom+bob-waveRise-Math.sin(hitIntensity*Math.PI)*hitIntensity*size*.10);ctx.rotate(roll);
+   ctx.drawImage(art.dummy,frame*cell,0,cell,art.dummy.naturalHeight,-jetSide*.5,-jetSide,jetSide,jetSide);ctx.restore();
+  }else{craft(p.x,p.y,size,b.col,lean,true,0)}
+  if(size>20){ctx.fillStyle='#022e54bc';ctx.beginPath();ctx.roundRect(p.x-23,p.y-size*1.22,46,15,6);ctx.fill();ctx.fillStyle='#c8fbff';ctx.font='bold 10px system-ui';ctx.textAlign='center';ctx.fillText('RIVAL',p.x,p.y-size*1.22+11)}
+ }
+}
+function playerCraft(){
+ const air=player.air>0?Math.sin((1-player.air/1.15)*Math.PI)*Math.min(75,h*.13):0;
+ const wave=waveMotion(player.wavePhase,player.wavePower);
+ const slide=clamp(player.sideVel/(86+player.speed*.56),-1,1);
+ const visualLean=clamp(player.lean*.72+slide*.45,-1,1);
+ const x=w*.5+visualLean*15,y=h*.80,scale=clamp(Math.min(w,h)*.29,98,180);
+ if(player.boost>0){ctx.save();ctx.globalAlpha=.18+.62*clamp(player.boost/BOOST_DURATION,0,1);ctx.strokeStyle='#ffe6a1';ctx.lineWidth=3;for(let i=0;i<10;i++){const yy=y+Math.random()*h*.3;ctx.beginPath();ctx.moveTo(x+(Math.random()-.5)*180,yy);ctx.lineTo(x+(Math.random()-.5)*190,yy+28);ctx.stroke()}ctx.restore()}
+ if(!ready('straight')){
+  ctx.save();ctx.globalAlpha=.65;ctx.strokeStyle='#e9ffff';ctx.lineWidth=3;for(let i=0;i<7;i++){const dx=(i-3)*18,n=(elapsed*200+i*33)%145;ctx.beginPath();ctx.moveTo(x+dx*.5,y+25+n*.25);ctx.lineTo(x+dx*1.1,y+38+n*.8);ctx.stroke()}ctx.restore();craft(x,y,scale,'#e9faff',visualLean,true,air);return;
+ }
+ const spriteH=clamp(Math.min(w,h)*.52,210,390),spriteW=spriteH*.75,bottom=h*.96,frame=spriteFrame(visualLean);
+ const airborne=air>0||wave.lift<-.5;
+ softShadow(x,bottom-8,spriteW*.60,spriteH*.125,airborne?clamp(.96+(wave.lift-air)/120,.30,.94):.96);
+ wakeArt(x,bottom,spriteH,visualLean,airborne?Math.max(air,-wave.lift):0,Math.max(player.landing,player.impact,wave.splash*.57),player.boost);
+ const shooting=player.fire>0,shotKeys=player.fireMode===1?['frontStraight','frontLeft','frontRight']:['fireStraight','fireLeft','fireRight'];
+ const key=shooting?shotKeys[frame]:['straight','left','right'][frame],id=ready(key)?key:'straight';
+ const bob=airborne?0:jetBob(.35,player.speed),landAge=1-player.landing/.55;
+ const recoil=player.landing>0?Math.sin(landAge*Math.PI*3)*(player.landing/.55)*11:0;
+ const impactStrength=player.impact/.5;
+ const hitRecoil=player.impact>0?-Math.sin((1-impactStrength)*Math.PI)*impactStrength*13:0;
+ const wavePitch=wave.lift<0?clamp(-wave.lift/75,0,1)*-.015:clamp(wave.submerge,0,1)*.021;
+ const roll=visualLean*.036+Math.sin(visualTime*(1.6+player.speed*.004))*.012+player.hitLean*impactStrength*.19+wavePitch;
+ ctx.save();ctx.translate(x+player.hitLean*impactStrength*22,bottom-air+wave.lift+bob+recoil+hitRecoil);ctx.rotate(roll);
+ ctx.drawImage(art[id],-spriteW*.5,-spriteH,spriteW,spriteH);ctx.restore();
+ // A precomposed transparent water sheet passes in front of the hull only at the splashdown trough.
+ if(wave.submerge>.04&&ready('waveFront')){
+  ctx.save();ctx.globalAlpha=clamp(wave.submerge*.95,0,.95);
+  ctx.drawImage(art.waveFront,x-spriteW*.83,bottom-spriteH*.25,spriteW*1.66,spriteH*.49);
+  ctx.restore();
+ }
+}
+function mapDraw(){const cw=mini.width/2,ch=mini.height/2;mc.clearRect(0,0,cw,ch);mc.fillStyle='#062b49aa';mc.fillRect(0,0,cw,ch);const xbase=cw*.50,top=7,bot=ch-15,scale=.15;mc.strokeStyle='#89d8f555';mc.lineWidth=10;mc.beginPath();for(let i=0;i<=100;i++){const s=COURSE*i/100,x=xbase+center(s)*scale,y=bot-(bot-top)*i/100;if(i===0)mc.moveTo(x,y);else mc.lineTo(x,y)}mc.stroke();mc.strokeStyle='#87f9ff';mc.lineWidth=2;mc.stroke();const marker=(s,l,col,r)=>{const x=xbase+(center(s)+l)*scale,y=bot-(bot-top)*clamp(s/COURSE,0,1);mc.fillStyle=col;mc.beginPath();mc.arc(x,y,r,0,Math.PI*2);mc.fill()};for(const b of bots)marker(b.s,b.lane,b.col,2);marker(player.s,player.lane,'#fff',4)}
+function render(){ctx.save();ctx.clearRect(0,0,w,h);if(shake>0)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake*.6);background();road();rivals();playerCraft();ctx.restore();mapDraw();if(mode==='done')document.getElementById('toast').classList.add('show')}
+function frame(now){const dt=Math.min(.04,Math.max(0,(now-last)/1000));last=now;visualTime+=dt;update(dt);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
