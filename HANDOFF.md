@@ -1,5 +1,18 @@
 # GAIA JET DUO — handoff / 작업 기록 (2026-11-07)
 
+## Latest update — v16.0 MAIN SYSTEM (2026-11-07)
+
+- Source branch still `jet-team-animation-skills`; keep `main` untouched. GitHub push is **not** implied by local file creation.
+- Added the user's **actual protagonist** purple-haired driver + pink-haired gunner front PNG from the current conversation as optimized `assets/main-duo-front.webp` (940×1253, ~180 KB); do not confuse it with `ROYAL` or any named rival front image. Seven existing named team front sprites remain unchanged.
+- Replaced old start-card display with urban river lobby: character/jet gently bob in the left scene, 2×2 iconic buttons on the right (락커룸, 경기 일정, 훈련, 기록실). Portrait aspect ratios and water effect are CSS; visually confirm on user's actual device. The old `#start` test hook remains hidden for backwards-compatible automated simulations.
+- `락커룸` persists 5 manually allocated GAIA stats (체력 = hit resistance; 색기 = booster charging; 음란 = bubble-gun effectiveness; 개방 = acceleration; 복종 = steering/grip), XP, level, and points via `localStorage` key `gaia-jet-duo-progress-v1`. Every level-up grants 2 discretionary points. No store/currency added.
+- Training **practice races**: four competitors (player, named rival, enemy dummy, allied dummy); 1 lap, XP even on loss. `강변 리그`: 4 total / 2 laps. `챔피언십`: eight total / 3 laps. Finish/results/XP/history loop works. Team AI settings are provisional balance knobs, not final tuned numbers.
+- Training panel lists `스쿼트` (체력·음란) and `컨베이어 배팅` (복종·개방) but intentionally **does not pretend they are implemented**. Source: `Alix1211/Wellness-RPG` branch `fix/r60-baseline-controls` (`src/gaia-life/squat-game.html`, `modules/minigames/batting/template.html`). Future work: import real mini-games with their existing images and callbacks, without inventing substitutes.
+- Boost now has a `3.2s` usable duration (`BOOST_EXTRA=154`) with sustained target speed and strong initial punch. Confirmed automated example 364 → 323 km/h after 2s → 206 km/h after ~5.2s. No change to watergun discrete-bubble design or the 10-hit penalty.
+- Four-team AI uses two cloned DUMMY instances; `activeBots` is the race participant set and remains `bots` on a default sandbox reset so existing physics tests still work. Friendly-target checks prevent auto-firing at allied dummy.
+- Offline output: `../GAIA-JET-DUO-v16.0-MAIN-SYSTEM.html`. `node smoke-preview.cjs --physics-tests` and `node smoke-preview.cjs ../GAIA-JET-DUO-v16.0-MAIN-SYSTEM.html --physics-tests` passed, including practice level-up, 4-/8-team setup and new boost sustain.
+- Unfinished: user device visual/FPS inspection, real source-port of two optional mini-games, final named rival special-skill mapping (do not invent), final AI difficulty/boost tuning, online publication/push (not performed).
+
 ## Source and continuity
 
 - Repository: https://github.com/Alix1211/Gaia-jet_duo.git

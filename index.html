@@ -18,6 +18,43 @@
 @media(max-width:650px){#top{padding:8px 9px 0;gap:5px}#badge{min-width:118px;padding:7px 9px}#brand{font-size:12px}#sub{font-size:8px;letter-spacing:1px}#speed{font-size:24px}#centerstats{min-width:93px;padding:7px}#centerstats strong{font-size:13px}#centerstats span{font-size:9px}#full,#reset,#themeSwitch{padding:9px 8px;font-size:10px}#righttop{gap:4px}#controls{left:10px;right:10px;bottom:13px}#steer,#actions{gap:7px}.btn{width:69px;height:65px;border-radius:18px;font-size:27px}.btn.jump,.btn.boost{font-size:12px}.hint{bottom:84px;font-size:9px}#mapwrap{top:69px;width:86px;height:106px;right:8px}}@media(max-height:460px){#mapwrap{top:62px;width:90px;height:98px}.btn{width:69px;height:62px}.hint{bottom:84px}#controls{bottom:12px}}
 @media(max-width:380px){#actions,#steer{gap:4px}.btn{width:61px;height:59px}}
 .rival-gallery{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:10px -8px}.rival-gallery div{min-width:0;border-radius:8px;background:#1346689c;padding:3px 1px}.rival-gallery img{width:100%;height:56px;object-fit:contain;filter:drop-shadow(0 2px 4px #001a)}.rival-gallery span{display:block;white-space:nowrap;font-size:8px;font-weight:800;color:#c7f3ff}.card{max-height:min(94vh,730px);overflow-y:auto}
+#hud{display:none}#hud.active{display:block}
+#homeRace{background:#09294ac9;border-radius:11px;font-size:20px;font-weight:900;padding:8px 13px;box-shadow:0 4px 18px #0017}#homeRace:active{background:#32a8c9}
+#intro{display:none!important}
+.hidden{display:none!important}
+#hub{position:absolute;inset:0;z-index:20;display:flex;overflow:hidden;background:#d4effa;color:#163d58}
+.hub-scene{position:relative;flex:1;min-width:0;overflow:hidden;isolation:isolate;background:linear-gradient(#75c8e2,#b8eef1 61%,#338898)}
+.hub-sky{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 38%;filter:saturate(1.1)}
+.hub-scene:after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,#d1faff20 0%,transparent 36%,#175b7366 83%,#07385290 100%)}
+.hub-water{position:absolute;left:-2%;right:-2%;bottom:-10%;height:53%;z-index:1;background:linear-gradient(180deg,#8ce5f250,#4c9ea3d9 31%,#146b80ed 100%),url("assets/water-river-muted.webp") center/cover;transform:skewY(-1.5deg)}
+.hub-water:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 21px,#e9ffff29 22px 24px,transparent 26px 42px);animation:water-drift 5s linear infinite;opacity:.64}
+.hub-boat{position:absolute;z-index:4;bottom:-17%;left:50%;height:108%;max-width:100%;aspect-ratio:940/1253;transform:translateX(-50%);animation:jet-float 3.4s ease-in-out infinite;filter:drop-shadow(0 24px 18px #11374b8a)}
+.hub-boat img{width:100%;height:100%;object-fit:contain;object-position:bottom}
+.hub-title{position:absolute;z-index:5;left:clamp(20px,3vw,56px);top:clamp(14px,5vh,48px);pointer-events:none;filter:drop-shadow(0 3px 8px #00364c92)}
+.hub-title .city{display:block;font-size:clamp(10px,1.3vw,15px);letter-spacing:.38em;font-weight:900;color:#e6ffff}
+.hub-title h1{margin:3px 0;font-style:italic;font-weight:1000;font-size:clamp(30px,5.2vw,82px);letter-spacing:-.06em;line-height:1;color:#f7feff;text-shadow:0 4px 0 #2085a3,0 8px 18px #033d6a}
+.hub-title h1 em{font-style:normal;color:#ffb5dc}
+.hub-menu{position:relative;z-index:6;width:31%;min-width:264px;display:flex;flex-direction:column;justify-content:center;padding:clamp(18px,3.1vw,48px);background:linear-gradient(146deg,#f9ffffed 0%,#e8e9f9f5 45%,#fbe0f4f5 100%);border-left:2px solid #ffffffb0;box-shadow:-16px 0 40px #0d56724f}
+.hub-menu:before{content:'';position:absolute;inset:12px;border:1px solid #ffffffb8;border-radius:24px;pointer-events:none}
+.hub-eyebrow{font-size:clamp(10px,1vw,13px);font-weight:1000;letter-spacing:.2em;color:#678da6;text-align:center;margin-bottom:5px}
+.hub-level{text-align:center;color:#63528d;font-weight:1000;font-size:clamp(14px,1.6vw,20px);margin-bottom:clamp(14px,3vw,32px)}
+.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(9px,1.1vw,18px);position:relative}
+.hub-tile{min-height:clamp(98px,21vh,175px);padding:16px 6px 13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:22px;color:#3f446c;background:linear-gradient(140deg,#fff,#e9fbff);border:2px solid #fff;box-shadow:0 8px 0 #9ba9d080,0 13px 17px #6972ad30;transition:transform .15s,box-shadow .15s}
+.hub-tile:nth-child(2){background:linear-gradient(145deg,#fff,#ffeaf8)}.hub-tile:nth-child(3){background:linear-gradient(145deg,#fff,#eefbea)}.hub-tile:nth-child(4){background:linear-gradient(145deg,#fff,#fff2de)}
+.hub-tile:hover{transform:translateY(-3px)}.hub-tile:active{transform:translateY(5px);box-shadow:0 3px 0 #9ba9d080,0 6px 9px #6972ad30}
+.hub-icon{width:clamp(46px,5.5vw,73px);height:clamp(46px,5.5vw,73px);display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#e5f6ff,#cfdbff);color:#6a6dbc;font-size:clamp(28px,3.4vw,45px);line-height:1;box-shadow:inset 0 2px 3px #fff,0 4px 7px #9da8d055}
+.hub-tile:nth-child(2) .hub-icon{background:linear-gradient(145deg,#ffe8f7,#f5c5ea);color:#c95199}.hub-tile:nth-child(3) .hub-icon{background:linear-gradient(145deg,#e4ffee,#b8e5d2);color:#279d80}.hub-tile:nth-child(4) .hub-icon{background:linear-gradient(145deg,#fff2d9,#f9dbaa);color:#b98935}
+.hub-tile span:last-child{font-size:clamp(13px,1.4vw,19px);font-weight:1000;letter-spacing:-.04em}
+@keyframes jet-float{0%,100%{transform:translate(-50%,0) rotate(-.4deg)}50%{transform:translate(-50%,-9px) rotate(.5deg)}}@keyframes water-drift{to{transform:translateY(25px)}}
+#menuPanel{position:absolute;inset:0;z-index:25;display:grid;place-items:center;padding:clamp(12px,3vw,38px);background:linear-gradient(150deg,#062e5bbb,#183a7299);backdrop-filter:blur(10px);pointer-events:auto}
+.panel-shell{width:min(920px,96vw);max-height:min(87vh,780px);overflow:hidden;display:flex;flex-direction:column;color:#2b3f5f;border:2px solid #fff;border-radius:26px;background:linear-gradient(145deg,#fcfffff5,#e9eefff8 55%,#fff0f9f9);box-shadow:0 20px 80px #031936aa}
+.panel-head{padding:14px clamp(16px,3vw,35px);display:flex;align-items:center;gap:18px;border-bottom:1px solid #bdcfde}.panel-head h2{margin:0;font-size:clamp(20px,3.4vw,32px);font-weight:1000;letter-spacing:-.06em}.panel-back{width:46px;height:45px;border-radius:14px;background:#e1eefb;color:#4a6087;font-size:30px;line-height:1;border:1px solid #afc9d8;flex-shrink:0}
+.panel-content{overflow-y:auto;overscroll-behavior:contain;padding:clamp(15px,2.6vw,30px);min-height:0}.panel-lead{font-weight:800;color:#7783a0;font-size:14px;margin:0 0 17px}
+.panel-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.panel-card{border-radius:19px;background:#fff;border:1px solid #d0dfef;padding:14px;box-shadow:0 7px 16px #60709021;min-width:0}.panel-card h3{margin:5px 0 8px;font-size:21px;color:#495378}.panel-card p{margin:8px 0 14px;color:#667490;font-size:13px;line-height:1.45}.panel-card img{width:100%;height:clamp(105px,25vh,180px);object-fit:contain;filter:drop-shadow(0 6px 5px #40578030)}.panel-action{width:100%;border:0;border-radius:13px;background:linear-gradient(130deg,#f6a9d8,#c579bb);color:#fff;font-size:15px;font-weight:900;padding:12px;box-shadow:0 4px 0 #8a4a89}.panel-action:active{transform:translateY(3px);box-shadow:0 1px 0 #8a4a89}.panel-action.secondary{background:linear-gradient(130deg,#71caca,#5e92c7);box-shadow:0 4px 0 #3f6699}.panel-action:disabled{background:#c9d4d9;color:#f5f7fa;box-shadow:none;cursor:not-allowed}
+.stat-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:15px;font-weight:900;color:#6d668c}.stat-row{display:grid;grid-template-columns:50px minmax(0,1fr) 74px 47px;align-items:center;gap:12px;padding:10px 13px;margin:9px 0;border-radius:15px;border:1px solid #d1dbea;background:#ffffffd9}.stat-glyph{font-size:30px;text-align:center}.stat-row strong{font-size:17px;color:#46567a}.stat-row small{display:block;color:#7b8ba3;margin-top:2px;font-size:11px}.stat-value{text-align:center;font-weight:1000;font-size:20px;color:#985fb0}.stat-plus{height:40px;border:0;border-radius:12px;font-weight:1000;font-size:25px;background:#a4e9dd;color:#176f70}.stat-plus:disabled{background:#e0e4ed;color:#a6b0bd;cursor:default}.record-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.record-metrics .panel-card{text-align:center}.record-metrics strong{font-size:clamp(26px,4vw,45px);color:#8b609b;display:block}.record-metrics small{color:#74819d;font-size:12px}
+#resultPanel{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:#102c5399;backdrop-filter:blur(8px)}.result-box{width:min(430px,90vw);text-align:center;background:linear-gradient(145deg,#f9ffff,#fde4f6);border:2px solid #fff;border-radius:27px;color:#4c5184;box-shadow:0 18px 65px #031b4288;padding:clamp(20px,4vw,35px)}.result-box h2{font-size:clamp(28px,5vw,42px);margin:4px 0 12px}.result-box p{font-size:17px;font-weight:800}.result-actions{display:flex;gap:10px;margin-top:22px}.result-actions button{flex:1}
+@media(max-width:770px){#homeRace{padding:6px 8px;font-size:17px}.hub-menu{min-width:228px;padding:18px}.hub-tile{min-height:96px}.hub-boat{height:103%;bottom:-16%}.hub-title h1{font-size:clamp(28px,5vw,52px)}.panel-cards{gap:8px}.panel-card{padding:9px}.panel-card h3{font-size:16px}.panel-card p{font-size:11px}.panel-card img{height:100px}.stat-row{grid-template-columns:35px minmax(0,1fr) 38px 35px;gap:5px;padding:8px}.stat-glyph{font-size:22px}.stat-row strong{font-size:14px}.stat-row small{font-size:10px}.stat-value{font-size:16px}.stat-plus{height:32px;font-size:21px}}
+@media(orientation:portrait){#hub{flex-direction:column}.hub-scene{flex:1;min-height:0}.hub-menu{width:100%;min-width:0;padding:13px 20px 23px;flex:0 0 auto}.hub-menu:before{inset:7px}.hub-eyebrow{display:none}.hub-level{margin:0 0 9px;font-size:13px}.hub-grid{gap:8px}.hub-tile{min-height:75px;padding:7px;flex-direction:row;gap:8px;border-radius:13px}.hub-icon{width:37px;height:37px;font-size:24px}.hub-tile span:last-child{font-size:13px}.hub-title{left:15px;top:12px}.hub-title h1{font-size:35px}.hub-boat{height:100%;bottom:-16%}.panel-cards{grid-template-columns:1fr}.panel-card img{height:95px}.panel-card{display:grid;grid-template-columns:90px 1fr;column-gap:12px}.panel-card img{grid-row:span 3}.panel-card h3,.panel-card p{margin:2px}.panel-card button{grid-column:2}.record-metrics{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -27,13 +64,33 @@
  <div id="top">
   <div id="badge"><div id="sub" style="display:none">GAIA</div><div id="brand">JET DUO</div><div id="speed">000 <small>KM/H</small></div></div>
  <div id="centerstats"><strong id="lap">LAP 1</strong><span id="distance">1 / 8</span><div id="boostTrack"><div id="boostFill"></div></div><span id="boostReadout">40%</span></div>
-  <div id="righttop"><button id="themeSwitch" type="button" aria-label="배경 변경">◈</button><button id="reset" type="button" aria-label="재시작">↺</button><button id="full" type="button" aria-label="전체화면">⛶</button></div>
+  <div id="righttop"><button id="homeRace" type="button" aria-label="메인 화면">⌂</button><button id="themeSwitch" type="button" aria-label="배경 변경">◈</button><button id="reset" type="button" aria-label="재시작">↺</button><button id="full" type="button" aria-label="전체화면">⛶</button></div>
  </div>
  <div id="mapwrap"><canvas id="map" aria-label="2D 코스 미니맵"></canvas><div id="maptitle">TOP VIEW MAP</div></div>
  <div id="toast"></div>
  <div id="controls"><div id="steer"><button class="btn" id="left" aria-label="왼쪽" type="button">◀</button><button class="btn" id="right" aria-label="오른쪽" type="button">▶</button></div><div id="actions"><button class="btn fire" id="fire" type="button" aria-label="자동 조준 버블건">●</button><button class="btn jump" id="jump" type="button" aria-label="점프">↟</button><button class="btn boost" id="boost" type="button" aria-label="부스터">⚡</button></div></div>
 </div>
-<div id="intro"><div class="card"><div class="tag">GAIA CITY</div><h1>JET DUO</h1><div class="rival-gallery"><div><img src="assets/teams/GAIA-JET-ROYAL-01-front.webp" alt="로열팀"></div><div><img src="assets/teams/GAIA-JET-NOIR-01-front.webp" alt="누아르팀"></div><div><img src="assets/teams/GAIA-JET-RED-01-front.webp" alt="레드팀"></div><div><img src="assets/teams/GAIA-JET-PINK-01-front.webp" alt="핑크팀"></div><div><img src="assets/teams/GAIA-JET-LEATHER-01-front.webp" alt="레더팀"></div><div><img src="assets/teams/GAIA-JET-KPOP-01-front.webp" alt="K팝팀"></div><div><img src="assets/teams/GAIA-JET-DUMMY-01-front.webp" alt="더미팀"></div></div><button id="start">START</button></div></div>
+<div id="intro" hidden><button id="start" type="button">START</button></div>
+<main id="hub" aria-label="가이아 제트 듀오 메인 메뉴">
+ <section class="hub-scene">
+  <img class="hub-sky" src="assets/scenery-city-river.webp" alt="도시 강변" draggable="false">
+  <div class="hub-water"></div>
+  <div class="hub-boat"><img src="assets/main-duo-front.webp" alt="주인공 두 명이 제트스키를 탄 정면 모습" draggable="false"></div>
+  <div class="hub-title"><span class="city">GAIA CITY</span><h1>JET <em>DUO</em></h1></div>
+ </section>
+ <nav class="hub-menu" aria-label="메인 메뉴">
+  <div class="hub-eyebrow">WATER RACING CLUB</div>
+  <div class="hub-level" id="hubLevel">LEVEL 1</div>
+  <div class="hub-grid">
+   <button class="hub-tile" id="menuLocker" type="button"><span class="hub-icon">♛</span><span>락커룸</span></button>
+   <button class="hub-tile" id="menuSchedule" type="button"><span class="hub-icon">⚑</span><span>경기 일정</span></button>
+   <button class="hub-tile" id="menuTraining" type="button"><span class="hub-icon">✦</span><span>훈련</span></button>
+   <button class="hub-tile" id="menuRecords" type="button"><span class="hub-icon">★</span><span>기록실</span></button>
+  </div>
+ </nav>
+</main>
+<div id="menuPanel" class="hidden" aria-label="게임 메뉴 패널"><div class="panel-shell"><header class="panel-head"><button class="panel-back" id="panelBack" type="button" aria-label="메인 메뉴로">‹</button><h2 id="panelTitle"></h2></header><div class="panel-content" id="panelContent"></div></div></div>
+<div id="resultPanel" class="hidden" aria-label="경기 결과"><div class="result-box"><div class="hub-eyebrow">RACE FINISHED</div><h2 id="resultTitle">FINISH!</h2><p id="resultInfo"></p><p id="resultReward"></p><div class="result-actions"><button class="panel-action secondary" id="resultHome" type="button">메인으로</button><button class="panel-action" id="resultReplay" type="button">다시 경기</button></div></div></div>
 </div>
 <script>
 (()=>{'use strict';
@@ -44,11 +101,28 @@ const speedEl=document.getElementById('speed'),distEl=document.getElementById('d
 // Scaling the oval and travel together preserves the ~90-second 5 km lap.
 const WORLD_SCALE=8.2,COURSE=5000*WORLD_SCALE,LANE=210,keys={left:false,right:false,fire:false};
 let w=960,h=600,dpr=1,mode='ready',last=performance.now(),elapsed=0,visualTime=0,toastTimer=0,shake=0;
-const BASE_SPEED=199,BOOST_DURATION=2.25,BOOST_EXTRA=119;
+const BASE_SPEED=199,BOOST_DURATION=3.2,BOOST_EXTRA=154;
 const PROJECTILE_SPEED=600*WORLD_SCALE/5.2;
 const WAVE_START=1050*WORLD_SCALE,WAVE_SPACING=1600*WORLD_SCALE,WAVE_DURATION=1.27;
 const TRACK_RADIUS=460*WORLD_SCALE,TRACK_STRAIGHT=(COURSE-2*Math.PI*TRACK_RADIUS)/2;
 const PLAYER_SPEC={accel:1.35,handling:1,grip:1,mass:1};
+const SAVE_KEY='gaia-jet-duo-progress-v1';
+const STAT_INFO=[
+ {id:'health',name:'체력',symbol:'♥',desc:'물방울·충돌 감속 저항'},
+ {id:'charm',name:'색기',symbol:'♡',desc:'하트 및 부스터 게이지 충전'},
+ {id:'naughty',name:'음란',symbol:'✧',desc:'물총 연사·특수기 효율'},
+ {id:'open',name:'개방',symbol:'➤',desc:'가속 반응과 최고 속도'},
+ {id:'obey',name:'복종',symbol:'↝',desc:'코너링과 조향 안정성'}
+];
+function freshProgress(){return{level:1,xp:0,points:0,stats:{health:1,charm:1,naughty:1,open:1,obey:1},races:0,wins:0,best:0,history:[]}}
+function readProgress(){try{if(typeof localStorage==='undefined')return freshProgress();const value=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!value||!value.stats||typeof value.level!=='number')return freshProgress();const base=freshProgress();return{...base,...value,stats:{...base.stats,...value.stats},history:Array.isArray(value.history)?value.history.slice(0,12):[]}}catch(_){return freshProgress()}}
+let progress=readProgress();
+const levelNeed=()=>120+(progress.level-1)*90;
+function saveProgress(){try{if(typeof localStorage!=='undefined')localStorage.setItem(SAVE_KEY,JSON.stringify(progress))}catch(_){}}
+function applyStats(){PLAYER_SPEC.accel=1.35+(progress.stats.open-1)*.09;PLAYER_SPEC.handling=1+(progress.stats.obey-1)*.055;PLAYER_SPEC.grip=1+(progress.stats.obey-1)*.045}
+applyStats();
+function addXp(amount){progress.xp+=Math.max(0,Math.round(amount));let levels=0;while(progress.xp>=levelNeed()){progress.xp-=levelNeed();progress.level++;progress.points+=2;levels++}saveProgress();syncHub();return levels}
+let raceConfig={id:'sandbox',title:'자유 경기',laps:Infinity};
 // A closed stadium-shaped circuit: two straights and two half-circle corners.
 function trackAt(s){
  const p=((s%COURSE)+COURSE)%COURSE,R=TRACK_RADIUS,L=TRACK_STRAIGHT,arc=Math.PI*R;
@@ -78,12 +152,13 @@ const TEAM_DEFS=[
 ];
 const player={s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0};
 const bots=TEAM_DEFS.map(t=>({...t,speed:t.top*.89,baseLane:t.lane,sideVel:0,air:0,boost:0,boostMeter:25+t.skill*30,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0,fire:0,shotCooldown:1.5+t.wave*.3,hitCombo:0,comboTime:0}));
+let activeBots=bots;
 const shots=[],bursts=[],hearts=Array.from({length:13},(_,i)=>({s:(310+i*360)*WORLD_SCALE,nextS:(310+i*360)*WORLD_SCALE,lane:[-90,0,90,40,-50][i%5],taken:false}));
 const BOOST_COST=55,BOOST_PICKUP=48,SHOT_INTERVAL=.22,COMBO_WINDOW=2.6;
 const hitBuoys=new Set(),buoyReactions=new Map();
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const ASSET_ROOT='assets/';
-const assetFiles={straight:'player-straight.webp',left:'player-left.webp',right:'player-right.webp',fireStraight:'player-fire-straight.webp',fireLeft:'player-fire-left.webp',fireRight:'player-fire-right.webp',frontStraight:'player-front-fire-straight.webp',frontLeft:'player-front-fire-left.webp',frontRight:'player-front-fire-right.webp',dummy:'dummy-movement.webp',rear:'splash-rear.webp',side:'splash-side.webp',water:'water-texture.webp',canalWater:'water-canal-clear.webp',riverWater:'water-river-muted.webp',beachWater:'water-beach-emerald.webp',citySky:'scenery-city-river.webp',beachSky:'scenery-beach.webp',domeSky:'scenery-artificial-dome.webp',buoys:'buoys-pink-yellow.webp',shadow:'shadow-feather.png',waveFront:'wave-front.png'};
+const assetFiles={straight:'player-straight.webp',left:'player-left.webp',right:'player-right.webp',fireStraight:'player-fire-straight.webp',fireLeft:'player-fire-left.webp',fireRight:'player-fire-right.webp',frontStraight:'player-front-fire-straight.webp',frontLeft:'player-front-fire-left.webp',frontRight:'player-front-fire-right.webp',mainFront:'main-duo-front.webp',dummy:'dummy-movement.webp',rear:'splash-rear.webp',side:'splash-side.webp',water:'water-texture.webp',canalWater:'water-canal-clear.webp',riverWater:'water-river-muted.webp',beachWater:'water-beach-emerald.webp',citySky:'scenery-city-river.webp',beachSky:'scenery-beach.webp',domeSky:'scenery-artificial-dome.webp',buoys:'buoys-pink-yellow.webp',shadow:'shadow-feather.png',waveFront:'wave-front.png'};
 for(const t of TEAM_DEFS)for(const [key,suffix] of [['front','01-front'],['move','02-move'],['attack','03-attack']])assetFiles[t.id+'_'+key]='teams/GAIA-JET-'+t.id+'-'+suffix+'.webp';
 const themes=[
  {label:'기본',water:'water',sky:null,palette:['#1b9eb9','#0b709e','#045078']},
@@ -184,21 +259,98 @@ function wakeArt(x,bottom,jetHeight,lean,airFactor=0,landing=0,boost=0,small=fal
 function laneOnTrack(s,lane){const t=trackAt(s);return{x:t.x+t.ty*lane,y:t.y-t.tx*lane}}
 function resize(){const r=canvas.getBoundingClientRect();w=Math.max(320,r.width);h=Math.max(220,r.height);dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const m=mini.getBoundingClientRect();mini.width=Math.max(40,Math.round(m.width*2));mini.height=Math.max(40,Math.round(m.height*2));mc.setTransform(2,0,0,2,0,0)}
 window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{last=performance.now()});resize();
+function syncHub(){document.getElementById('hubLevel').textContent='LEVEL '+progress.level+' · XP '+progress.xp+'/'+levelNeed()}
+function showHub(){
+ mode='ready';keys.left=false;keys.right=false;keys.fire=false;
+ document.getElementById('hud').classList.remove('active');
+ document.getElementById('hub').classList.remove('hidden');
+ document.getElementById('menuPanel').classList.add('hidden');
+ document.getElementById('resultPanel').classList.add('hidden');
+ syncHub();
+}
+function openPanel(page){
+ const panel=document.getElementById('menuPanel'),content=document.getElementById('panelContent'),title=document.getElementById('panelTitle');
+ const names={locker:'락커룸',schedule:'경기 일정',training:'훈련',records:'기록실'};
+ title.textContent=names[page]||'';
+ if(page==='locker'){
+  content.innerHTML=`<div class="stat-head"><span>LEVEL ${progress.level} · XP ${progress.xp}/${levelNeed()}</span><span>배분 가능 ${progress.points} P</span></div>`+
+   STAT_INFO.map(s=>`<div class="stat-row"><div class="stat-glyph">${s.symbol}</div><div><strong>${s.name}</strong><small>${s.desc}</small></div><div class="stat-value">${progress.stats[s.id]}</div><button class="stat-plus" type="button" data-stat="${s.id}" ${progress.points<=0?'disabled':''} aria-label="${s.name} 올리기">+</button></div>`).join('');
+  content.querySelectorAll('[data-stat]').forEach(btn=>btn.onclick=()=>{if(progress.points<=0)return;const stat=btn.dataset.stat;if(!STAT_INFO.some(s=>s.id===stat))return;progress.stats[stat]++;progress.points--;applyStats();saveProgress();openPanel('locker')});
+ }else if(page==='schedule'){
+  content.innerHTML=`<p class="panel-lead">작은 경기는 4팀, 큰 대회만 8팀이 참가합니다.</p><div class="panel-cards">
+   <div class="panel-card"><img src="assets/teams/GAIA-JET-PINK-01-front.webp" alt="핑크 라이벌"><h3>강변 리그</h3><p>4팀 · 2랩<br>라이벌 1팀 + 더미 2팀</p><button class="panel-action" type="button" data-race="city">경기 출전</button></div>
+   <div class="panel-card"><img src="assets/teams/GAIA-JET-LEATHER-01-front.webp" alt="강한 라이벌"><h3>챔피언십</h3><p>8팀 · 3랩<br>네임드 전원 출전</p><button class="panel-action" type="button" data-race="champion">대회 출전</button></div>
+   <div class="panel-card"><img src="assets/teams/GAIA-JET-ROYAL-01-front.webp" alt="로열 라이벌"><h3>자유 연습</h3><p>4팀 · 1랩<br>패배해도 경험치 획득</p><button class="panel-action secondary" type="button" data-race="practice">연습 출발</button></div>
+  </div>`;
+ }else if(page==='training'){
+  content.innerHTML=`<p class="panel-lead">훈련은 선택 사항입니다. 연습경기만으로도 레벨과 능력치를 올릴 수 있습니다.</p><div class="panel-cards">
+   <div class="panel-card"><img src="assets/main-duo-front.webp" alt="주인공 듀오"><h3>연습경기</h3><p>4팀 · 1랩 · 경험치 획득<br>순위와 관계없이 성장합니다.</p><button class="panel-action" type="button" data-race="practice">연습 시작</button></div>
+   <div class="panel-card"><div style="font-size:65px;text-align:center;padding:10px">♧</div><h3>스쿼트</h3><p>체력 · 음란<br>GAIA LIFE 미니게임 연결 예정</p></div>
+   <div class="panel-card"><div style="font-size:65px;text-align:center;padding:10px">✦</div><h3>컨베이어 배팅</h3><p>복종 · 개방<br>GAIA LIFE 미니게임 연결 예정</p></div>
+  </div>`;
+ }else if(page==='records'){
+  const best=progress.best>0?formatTime(progress.best):'--:--';
+  content.innerHTML=`<div class="record-metrics"><div class="panel-card"><strong>${progress.races}</strong><small>완주 횟수</small></div><div class="panel-card"><strong>${progress.wins}</strong><small>우승 횟수</small></div><div class="panel-card"><strong>${best}</strong><small>최고 랩 타임</small></div></div><h3 style="margin:22px 0 10px;color:#535677">최근 기록</h3>`+
+   (progress.history.length?progress.history.map(r=>`<div class="stat-row" style="grid-template-columns:1fr auto auto"><strong>${r.title}</strong><span style="color:#657698">${r.place}위 / ${r.teams}팀</span><span class="stat-value">+${r.xp} XP</span></div>`).join(''):'<p class="panel-lead">아직 완주한 경기가 없습니다.</p>');
+ }
+ if(page==='schedule'||page==='training')content.querySelectorAll('[data-race]').forEach(btn=>btn.onclick=()=>launchRace(btn.dataset.race));
+ panel.classList.remove('hidden');
+}
+function formatTime(sec){const m=Math.floor(sec/60),s=Math.floor(sec%60);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function launchRace(kind){
+ reset();
+ const settings={practice:{title:'자유 연습',laps:1},city:{title:'강변 리그',laps:2},champion:{title:'챔피언십',laps:3}};
+ raceConfig={id:kind,...(settings[kind]||{title:'자유 경기',laps:Infinity})};
+ if(kind==='practice'||kind==='city'){
+  const easy=kind==='practice',named=bots[(progress.races+(easy?1:0))%6];
+  const rival={...named,s:easy?70*WORLD_SCALE:145*WORLD_SCALE,lane:64,baseLane:64,top:easy?184:205,aggression:easy?.48:.88,skill:easy?.69:.86};
+  const enemy={...bots[6],s:32*WORLD_SCALE,lane:100,baseLane:100,top:easy?174:195,aggression:easy?.33:.50,skill:.63,side:'enemy'};
+  const ally={...bots[6],s:-120*WORLD_SCALE,lane:-76,baseLane:-76,top:easy?172:189,aggression:.25,skill:.58,side:'ally',col:'#80f5e5',wave:5.7};
+  activeBots=[rival,enemy,ally];
+ }else activeBots=bots;
+ themeIndex=1;
+}
+function finishRace(){
+ if(mode!=='running')return;
+ mode='result';keys.fire=false;keys.left=false;keys.right=false;
+ const place=1+activeBots.filter(b=>b.s>player.s).length;
+ const xp=Math.round((raceConfig.id==='practice'?100:raceConfig.id==='city'?150:230)+Math.max(0,activeBots.length+1-place)*18);
+ progress.races++;if(place===1)progress.wins++;
+ const lapSeconds=elapsed/raceConfig.laps;
+ if(Number.isFinite(lapSeconds)&&(progress.best===0||lapSeconds<progress.best))progress.best=lapSeconds;
+ progress.history.unshift({title:raceConfig.title,place,teams:activeBots.length+1,xp});progress.history=progress.history.slice(0,12);
+ const leveled=addXp(xp);
+ document.getElementById('resultTitle').textContent=place===1?'WINNER!':'FINISH!';
+ document.getElementById('resultInfo').textContent=`${raceConfig.title} · ${place}위 / ${activeBots.length+1}팀 · ${formatTime(elapsed)}`;
+ document.getElementById('resultReward').textContent='+'+xp+' XP'+(leveled?' · LEVEL UP +'+(leveled*2)+'P!':'');
+ document.getElementById('resultPanel').classList.remove('hidden');
+}
+document.getElementById('menuLocker').onclick=()=>openPanel('locker');
+document.getElementById('menuSchedule').onclick=()=>openPanel('schedule');
+document.getElementById('menuTraining').onclick=()=>openPanel('training');
+document.getElementById('menuRecords').onclick=()=>openPanel('records');
+document.getElementById('panelBack').onclick=()=>document.getElementById('menuPanel').classList.add('hidden');
+document.getElementById('resultHome').onclick=showHub;
+document.getElementById('resultReplay').onclick=()=>launchRace(raceConfig.id);
+document.getElementById('homeRace').onclick=showHub;
+syncHub();
 function reset(){
  Object.assign(player,{s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,slowTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0});
  elapsed=0;visualTime=0;shake=0;hitBuoys.clear();buoyReactions.clear();shots.length=0;bursts.length=0;
  hearts.forEach(heart=>{heart.taken=false;heart.nextS=heart.s});
  TEAM_DEFS.forEach((t,i)=>{Object.assign(bots[i],{s:t.s,lane:t.lane,baseLane:t.lane,sideVel:0,air:0,boost:0,boostMeter:25+t.skill*30,speed:t.top*.89,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0,fire:0,shotCooldown:1.5+t.wave*.3,hitCombo:0,comboTime:0,slowTime:0})});
- keys.fire=false;mode='running';lapEl.textContent='LAP 1';document.getElementById('intro').classList.add('hidden');
+ keys.fire=false;mode='running';raceConfig={id:'sandbox',title:'자유 경기',laps:Infinity};activeBots=bots;
+ lapEl.textContent='LAP 1';document.getElementById('intro').classList.add('hidden');
+ document.getElementById('hub').classList.add('hidden');document.getElementById('menuPanel').classList.add('hidden');document.getElementById('resultPanel').classList.add('hidden');document.getElementById('hud').classList.add('active');
 }
 function say(){/* Race feedback is shown in movement, impact and particles, never speech overlays. */}
-document.getElementById('start').onclick=reset;document.getElementById('reset').onclick=reset;
+document.getElementById('start').onclick=reset;document.getElementById('reset').onclick=()=>launchRace(raceConfig.id);
 document.getElementById('themeSwitch').onclick=()=>{themeIndex=(themeIndex+1)%themes.length};
 document.getElementById('full').onclick=()=>{if(!document.fullscreenElement){document.getElementById('shell').requestFullscreen?.().catch(()=>say('기기에서 전체화면이 제한됩니다'))}else document.exitFullscreen?.()};
 function btnHold(id,key){const el=document.getElementById(id);function on(e){e.preventDefault();keys[key]=true;el.classList.add('pressed');try{el.setPointerCapture(e.pointerId)}catch(_){}}function off(e){e.preventDefault();keys[key]=false;el.classList.remove('pressed')}el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',()=>{keys[key]=false;el.classList.remove('pressed')})}
 btnHold('left','left');btnHold('right','right');
 btnHold('fire','fire');
-function earnBoost(amount){player.boostMeter=clamp(player.boostMeter+amount,0,100)}
+function earnBoost(amount){player.boostMeter=clamp(player.boostMeter+amount*(1+(progress.stats.charm-1)*.08),0,100)}
 function jump(){if(mode!=='running')return;if(player.air<=0){
  const next=Math.max(0,Math.ceil((player.s-WAVE_START)/WAVE_SPACING));
  const crest=waveCenter(next,player.lane);
@@ -210,7 +362,7 @@ function boost(){
  player.boostMeter-=BOOST_COST;
  player.boost=BOOST_DURATION;
  // Immediate punch followed by an easing speed target.
- player.speed=Math.min(352,Math.max(278,player.speed+91));
+ player.speed=Math.min(390,Math.max(364,player.speed+122));
 }
 document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
 document.getElementById('boost').addEventListener('pointerdown',e=>{e.preventDefault();boost()});
@@ -223,10 +375,11 @@ function pathHit(ps0,pl0,ps1,pl1,os0,ol0,os1,ol1,lengthRadius,laneRadius){
  const t=clamp(-(a*da+b*db)/Math.max(.0000001,da*da+db*db),0,1);
  return (a+da*t)**2+(b+db*t)**2<1;
 }
+function friendly(a,b){return (a===player||a.side==='ally')&&(b===player||b.side==='ally')}
 function nearestTarget(owner,maxRange=650){
  let best=null,bestScore=Infinity;
- for(const t of [player,...bots]){
-  if(t===owner)continue;
+ for(const t of [player,...activeBots]){
+  if(t===owner||friendly(owner,t))continue;
   const longitudinal=Math.abs(t.s-owner.s),lateral=Math.abs(t.lane-owner.lane);
   if(longitudinal<38||longitudinal>maxRange||lateral>235)continue;
   const score=longitudinal+lateral*.35;
@@ -255,7 +408,9 @@ function waterHit(target,owner){
  target.hitCombo++;
  target.comboTime=COMBO_WINDOW;
  const comboBreak=target.hitCombo>=10;
- target.speed=Math.max(35,target.speed*(comboBreak?.53:.963));
+ const resistance=target===player?Math.min(.16,(progress.stats.health-1)*.018):0;
+ const pressure=owner===player?Math.min(.07,(progress.stats.naughty-1)*.008):0;
+ target.speed=Math.max(35,target.speed*(comboBreak?.53+resistance:.963+resistance*.09-pressure));
  target.slowTime=comboBreak?2.1:.38;
  target.impact=Math.max(target.impact,comboBreak?.60:.25);
  target.hitLean=owner.lane<target.lane?1:-1;
@@ -270,9 +425,9 @@ function updateShots(dt,oldS,oldLane,oldBots){
  for(let i=shots.length-1;i>=0;i--){
   const shot=shots[i],before=shot.s,oldShotLane=shot.lane;
   shot.life-=dt;shot.trail+=dt;shot.s+=shot.dir*PROJECTILE_SPEED*dt;shot.lane+=shot.laneVel*dt;
-  for(let j=-1;j<bots.length;j++){
-   const t=j<0?player:bots[j],prev=j<0?{s:oldS,lane:oldLane}:oldBots[j];
-   if(t===shot.owner||(t.air||0)>.22)continue;
+  for(let j=-1;j<activeBots.length;j++){
+   const t=j<0?player:activeBots[j],prev=j<0?{s:oldS,lane:oldLane}:oldBots[j];
+   if(t===shot.owner||friendly(t,shot.owner)||(t.air||0)>.22)continue;
    if(pathHit(before,oldShotLane,shot.s,shot.lane,prev.s,prev.lane,t.s,t.lane,35,49)){
     waterHit(t,shot.owner);shot.life=0;break;
    }
@@ -291,7 +446,7 @@ function collectHearts(oldS,oldLane){
 }
 function registerHit(kind,direction,target){
  player.hitCooldown=.72;player.impact=.5;player.hitLean=direction;
- player.speed=Math.max(33,player.speed*(kind==='buoy'?.63:.70));
+ player.speed=Math.max(33,player.speed*(kind==='buoy'?.63:.70)+Math.min(28,(progress.stats.health-1)*3));
  player.knock=direction*(kind==='buoy'?220:310);
  shake=kind==='buoy'?11:13;
  if(kind==='buoy'){
@@ -315,8 +470,8 @@ function resolveCollisions(oldS,oldLane,oldBots){
    registerHit('buoy',-side,at);return;
   }
  }
- for(let i=0;i<bots.length;i++){
-  const b=bots[i],prev=oldBots[i];if(b.hitCooldown>0)continue;
+ for(let i=0;i<activeBots.length;i++){
+  const b=activeBots[i],prev=oldBots[i];if(b.hitCooldown>0)continue;
   if(pathHit(oldS,oldLane,player.s,player.lane,prev.s,prev.lane,b.s,b.lane,61,67)){
    // When perfectly aligned, separate the pair according to relative steering.
    const direction=player.lane<b.lane?-1:player.lane>b.lane?1:(player.steer<0?-1:1);
@@ -327,7 +482,7 @@ function resolveCollisions(oldS,oldLane,oldBots){
 function update(dt){
  if(mode!=='running')return;
  elapsed+=dt;
- const oldS=player.s,oldLane=player.lane,oldBots=bots.map(b=>({s:b.s,lane:b.lane}));
+ const oldS=player.s,oldLane=player.lane,oldBots=activeBots.map(b=>({s:b.s,lane:b.lane}));
  const steerv=(keys.right?1:0)-(keys.left?1:0);
  player.steer+=(steerv-player.steer)*Math.min(1,dt*7);
  player.lean+=(steerv-player.lean)*Math.min(1,dt*4.5);
@@ -341,11 +496,12 @@ function update(dt){
  if(wasAir>0&&player.air===0)player.landing=.55;
  player.landing=Math.max(0,player.landing-dt);
  if(player.wavePhase>0){player.wavePhase+=dt;if(player.wavePhase>=WAVE_DURATION)player.wavePhase=0;}
- if(keys.fire&&player.shotCooldown===0&&shoot(player)){player.shotCooldown=SHOT_INTERVAL}
+ if(keys.fire&&player.shotCooldown===0&&shoot(player)){player.shotCooldown=SHOT_INTERVAL/(1+(progress.stats.naughty-1)*.045)}
  player.fire=Math.max(0,player.fire-dt);
  const boostFraction=clamp(player.boost/BOOST_DURATION,0,1);
  const cornerDrag=(curveAt(player.s)>0?.055:.012)*Math.abs(player.steer);
- const target=(BASE_SPEED+BOOST_EXTRA*boostFraction*boostFraction)*(player.slowTime>0?.75:1)*(1-cornerDrag);
+ const boostPower=player.boost>0?(.64+.36*boostFraction):0;
+ const target=(BASE_SPEED+(progress.stats.open-1)*2.2+BOOST_EXTRA*boostPower)*(player.slowTime>0?.75:1)*(1-cornerDrag);
  player.speed+=(target-player.speed)*Math.min(1,dt*(player.boost>0?3.7:PLAYER_SPEC.accel));
  const v=player.speed;
  const profile=themeIndex===0?INERTIA:SURF_PROFILES[themeIndex];
@@ -374,7 +530,7 @@ function update(dt){
    }
   }
  }
- for(const b of bots){
+ for(const b of activeBots){
   b.comboTime=Math.max(0,b.comboTime-dt);
   b.slowTime=Math.max(0,b.slowTime-dt);
   b.shotCooldown=Math.max(0,b.shotCooldown-dt);
@@ -392,7 +548,7 @@ function update(dt){
   b.knockLong*=Math.exp(-dt*4.5);
   // Lane choice: each team follows its own racing line and overtakes nearby craft.
   let avoid=0;
-  for(const other of [player,...bots]){
+  for(const other of [player,...activeBots]){
    if(other===b)continue;
    const gap=other.s-b.s,laneGap=other.lane-b.lane;
    if(gap>0&&gap<130&&Math.abs(laneGap)<67)avoid+=(laneGap>=0?-105:105)*(1-gap/185);
@@ -410,7 +566,7 @@ function update(dt){
   if(b.air===0&&distance>=14*WORLD_SCALE&&distance<36*WORLD_SCALE&&Math.sin(b.wave*8+next*2.7)>(.32-b.skill)){
    b.air=1.1;b.boostMeter=clamp(b.boostMeter+5,0,100);
   }
-  if(oldBots[bots.indexOf(b)].s<crest&&b.s>=crest&&b.air===0){
+  if(oldBots[activeBots.indexOf(b)].s<crest&&b.s>=crest&&b.air===0){
    b.speed*=1-.12*SURF_PROFILES[themeIndex].wave/b.mass;
    b.slowTime=Math.max(b.slowTime,.35);b.impact=Math.max(b.impact,.22);
   }
@@ -431,12 +587,13 @@ function update(dt){
  if(toastTimer>0)toastTimer=Math.max(0,toastTimer-dt);
  const lap=Math.floor(player.s/COURSE)+1;
  if(lap!==Math.floor(oldS/COURSE)+1){hitBuoys.clear();buoyReactions.clear();}
- const place=1+bots.filter(b=>b.s>player.s).length;
- lapEl.textContent='LAP '+lap;
+ const place=1+activeBots.filter(b=>b.s>player.s).length;
+ lapEl.textContent='LAP '+Math.min(lap,raceConfig.laps);
  speedEl.innerHTML=Math.round(player.speed).toString().padStart(3,'0')+' <small>KM/H</small>';
- distEl.textContent=place+' / 8';
+ distEl.textContent=place+' / '+(activeBots.length+1);
  document.getElementById('boostFill').style.width=player.boostMeter.toFixed(1)+'%';
  document.getElementById('boostReadout').textContent=Math.floor(player.boostMeter)+'%';
+ if(Number.isFinite(raceConfig.laps)&&player.s>=raceConfig.laps*COURSE)finishRace();
 }
 function poly(points,fill,stroke,width=1){if(points.length<2)return;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=width;ctx.strokeStyle=stroke;ctx.stroke()}}
 function line(points,color,width=1){ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
@@ -551,7 +708,7 @@ function impactEffects(){
  }
 }
 function rivals(){
- const visible=bots.map(b=>({...b,z:b.s-player.s})).filter(b=>b.z>60&&b.z<1400).sort((a,b)=>b.z-a.z);
+ const visible=activeBots.map(b=>({...b,z:b.s-player.s})).filter(b=>b.z>60&&b.z<1400).sort((a,b)=>b.z-a.z);
  for(const b of visible){
   const p=proj(b.z,b.lane);if(p.y<h*.26||p.y>h+110)continue;
   const size=clamp(p.sc*90,6,180),lean=clamp(b.sideVel/(100+b.speed*.5)-curveAt(b.s)*TRACK_RADIUS*.42+Math.sin(elapsed*2+b.wave)*.05,-1,1);
@@ -620,11 +777,11 @@ function mapDraw(){
  for(let i=0;i<=100;i++){const p=point(COURSE*i/100);if(i===0)mc.moveTo(p.x,p.y);else mc.lineTo(p.x,p.y)}mc.closePath();mc.stroke();
  mc.strokeStyle='#9afaff';mc.lineWidth=1.8;mc.stroke();
  const marker=(s,l,col,r)=>{const p=point(s,l);mc.fillStyle=col;mc.beginPath();mc.arc(p.x,p.y,r,0,Math.PI*2);mc.fill()};
- for(const b of bots)marker(b.s,b.lane,b.col,2.6);
+ for(const b of activeBots)marker(b.s,b.lane,b.col,2.6);
  marker(player.s,player.lane,'#fff',4);
 }
 function render(){ctx.save();ctx.clearRect(0,0,w,h);if(shake>0)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake*.6);background();road();pickups();rivals();waterShots();playerCraft();impactEffects();ctx.restore();mapDraw()}
-function frame(now){const dt=Math.min(.04,Math.max(0,(now-last)/1000));last=now;visualTime+=dt;update(dt);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+function frame(now){const dt=Math.min(.04,Math.max(0,(now-last)/1000));last=now;if(mode==='running'){visualTime+=dt;update(dt);render()}requestAnimationFrame(frame)}requestAnimationFrame(frame);
 })();
 </script>
 </body>

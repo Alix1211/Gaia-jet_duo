@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const src = path.join(dir, 'index.html');
-const output = path.join(path.dirname(dir), 'GAIA-JET-DUO-v15.3-SPEED-FEEL.html');
+const output = path.join(path.dirname(dir), 'GAIA-JET-DUO-v16.0-MAIN-SYSTEM.html');
 let html = fs.readFileSync(src, 'utf8');
 if (!html.includes("const ASSET_ROOT='assets/';")) throw Error('Missing asset-root marker');
 html = html.replace("const ASSET_ROOT='assets/';", "const ASSET_ROOT='';");

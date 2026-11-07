@@ -14,7 +14,7 @@ for(const file of teamFiles)assert(fs.statSync(path.join(teamDir,file)).size>100
 const htmlPath = process.argv.slice(2).find(arg => !arg.startsWith('--')) || path.join(dir, 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1]
-  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={WORLD_SCALE,COURSE,player,bots,shots,bursts,hearts,shoot,nearestTarget,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,trackAt,curveAt,render};})();');
+  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={WORLD_SCALE,COURSE,player,bots,shots,bursts,hearts,shoot,nearestTarget,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,trackAt,curveAt,render,launchRace,showHub,finishRace,openPanel,progress,getActiveBots:()=>activeBots,getMode:()=>mode};})();');
 const width = 1280, height = 720;
 const mainCanvas = createCanvas(width, height);
 const mapCanvas = createCanvas(112, 150);
@@ -24,6 +24,7 @@ function element(id) {
     id, textContent: '', innerHTML: '', onclick: null, style: {},
     classList: { add() {}, remove() {}, contains() { return false; } },
     events: {},
+    querySelectorAll() { return []; },
     addEventListener(type, callback) { (this.events[type] ||= []).push(callback); },
     getBoundingClientRect() { return id === 'race' ? { width, height } : { width: 112, height: 150 }; },
     getContext() { return id === 'race' ? mainCanvas.getContext('2d') : mapCanvas.getContext('2d'); },
@@ -156,8 +157,8 @@ async function main() {
     const launch = player.speed;
     for (let i = 0; i < 120; i++) update(1 / 60);
     const faded = player.speed;
-    assert(faded < launch && faded > 199, 'Boost did not ease down');
-    for (let i = 0; i < 80; i++) update(1 / 60);
+    assert(faded < launch && faded > 290, 'Boost must sustain a clear speed surge for several seconds');
+    for (let i = 0; i < 190; i++) update(1 / 60);
     assert(player.speed < 220, 'Boost did not return toward cruise speed');
     console.log('Boost surge/decay: OK', Math.round(launch), Math.round(faded), Math.round(player.speed));
     reset();
@@ -251,6 +252,24 @@ async function main() {
     assert([player,...bots].every(c=>Number.isFinite(c.s)&&Number.isFinite(c.lane)&&Number.isFinite(c.speed)),
       'Long running physics produced a non-finite craft position or speed');
     console.log('200-second race continuity / projectile and effect caps: OK',Math.round(player.s));
+    const {launchRace,showHub,progress,getActiveBots,getMode}=context.__gaiaTest;
+    showHub();
+    get('menuTraining').onclick();
+    assert(get('panelContent').innerHTML.includes('스쿼트')&&get('panelContent').innerHTML.includes('컨베이어 배팅'),
+      'Optional training menu is missing its two planned mini-games');
+    const originalRaces=progress.races;
+    launchRace('practice');
+    assert.equal(getActiveBots().length,3,'Practice racing should have four teams including the player');
+    player.s=COURSE+10;
+    update(1/60);
+    assert.equal(getMode(),'result','One-lap practice did not finish');
+    assert.equal(progress.races,originalRaces+1,'Practice finishing was not recorded');
+    assert(progress.level>=2&&progress.points>=2,'Practice did not award level-up stat points');
+    get('resultHome').onclick();
+    assert.equal(getMode(),'ready','Return-to-menu control failed');
+    launchRace('champion');
+    assert.equal(getActiveBots().length,7,'Championship must retain eight total teams');
+    console.log('4/8-team schedules, main menus, practice XP and stat progression: OK');
   }
 }
 main().catch(err => { console.error(err); process.exitCode = 1; });
