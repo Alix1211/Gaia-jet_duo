@@ -11,7 +11,7 @@
 ## Confirmed design rules to preserve
 
 - 2.5D rear-view water-jetski arcade racer, driver (purple hair) and gunner (pink hair).
-- Separate front `FIRE ▲` / back `FIRE ▼`; no sideways attack.
+- **Superseded in v15:** separate front/rear buttons are replaced by **one held FIRE button with automatic nearest-rival aiming**. The gun shoots round, translucent bubble pellets, not a continuous water stream; targets can dodge the projectile.
 - Waterguns disable handling, slow down and cause skids, not hull damage.
 - Each water hit causes small slowdown; the **tenth consecutive hit causes major slowdown**.
 - Colliding with a buoy or rival slows and knocks both craft; strong inertia, wave buoyancy and jump avoidance remain.
@@ -56,4 +56,25 @@ Both source and bundled offline tests passed for the earlier v14 test. The bundl
 - New transparent PNG master sprites: `assets-clean/teams/` (21). New game WebPs overwrite only the previous broken **derived** files in `assets/teams/` (21). The originals in `assets-source/teams/` remain untouched.
 - Visual QA contact sheets: `../GAIA-JET-DUO-v14-CUTOUT-QA-MOVE.png`, `../GAIA-JET-DUO-v14-CUTOUT-QA-ATTACK.png`. Source and packed gameplay preview show intact silhouettes; all 42 animated frame borders pass automatic tests.
 - Some **original source art** reaches the original canvas boundary (e.g. ROYAL attack ponytail at image top). No art outside that source exists to extract; any pixel-perfect outpainting at those original edges requires separately approved illustration repair. The current correction eliminates **all newly introduced frame-cutting**, not missing source pixels.
-- Rebuild offline game with `node bundle.mjs` → `../GAIA-JET-DUO-v14.1-CLEAN.html`, then run both source and bundled smoke tests.
+- The historical standalone art-correction deliverable is `../GAIA-JET-DUO-v14.1-CLEAN.html`. The bundler now creates a separate v15 file, leaving v14.1 intact.
+
+## v15 — endless circuit / race foundations (2026-11-07)
+
+**User priorities:** art quality is foremost; avoid sprite cropping and leftover fragments, don't add explanatory gameplay text, and make the race itself compelling before optional shooting/special skills. The user approved implementation of this first phase, and audio files will be provided separately **after** gameplay code testing.
+
+- Source `index.html` now has a genuinely closed 5,000m *oval* course: two physical straights and two half-circle bends. `trackAt(s)` returns continuous geometry and normal, `proj()` uses that world geometry, and the minimap draws the real oval. No finish-state cutoff; laps continue indefinitely; ranking and LAP are terse HUD indications.
+- Actual speed progression in meters (`speed/3.6`), turn-induced lateral drift, per-team acceleration/top-speed/mass/handling/grip. Stronger/heavier LEATHER and nimble PINK are intentionally contrasted; these numerical test values are provisional until real-device feedback.
+- Fewer waves: crest start 1,050m and spacing 1,600m (roughly 3 per lap). Crossing a wave without a manual jump now causes an actual speed penalty and shake; manual jump clears the penalty. River/sea/dome profiles are retained.
+- Rival teams run AI racing lines, lane changes and obstacle avoidance; they anticipate/jump waves, fire auto-targeted bubbles in either direction and spend their own boost meter. Shooting can involve rivals as well as the player. These are generic team behaviors; the previously specified unique special skills **remain unimplemented** pending recovery of their original table.
+- Single button `FIRE` (`J` or `K` on keyboard): nearest eligible craft within ~650m, snapshots target's lateral direction, projectile flies forward/back and can miss. 0.22-second fire interval; 10-shot combo slowdown preserved. Round, translucent bubble projectile rendering, circular splash particles and visible impact reactions; no water-beam graphics.
+- Removed on-course name tags, collision text toasts, help labels and footer. Minimal `KM/H`, `LAP`, `position / 8`, boost gauge and icon buttons remain. Start card previews the character art with no verbose explanation.
+- Character source art/21 cleaned master PNGs/21 optimized team WebPs are **unchanged** from v14.1 and have the same cutout validation. No new art generation, crops or avatar substitutions.
+- Offline output is `../GAIA-JET-DUO-v15-LOOP-RACE.html` (10.92MB). Test with:
+
+```bash
+node smoke-preview.cjs --physics-tests
+node bundle.mjs
+node smoke-preview.cjs ../GAIA-JET-DUO-v15-LOOP-RACE.html --physics-tests
+```
+
+Source and standalone physics/render tests pass, including oval closure, lap rollover, rival jumping/boosting/shooting, auto-targeting in both directions, burst graphics and terrain-specific waves. No actual Android tablet FPS or hands-on handling test has been performed. The user's next step is gameplay testing, then provide downloaded BGM/SFX for linking, then consider individual team special skills.

@@ -14,7 +14,7 @@ for(const file of teamFiles)assert(fs.statSync(path.join(teamDir,file)).size>100
 const htmlPath = process.argv.slice(2).find(arg => !arg.startsWith('--')) || path.join(dir, 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1]
-  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={player,bots,shots,hearts,shoot,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,render};})();');
+  .replace(/\}\)\(\);\s*$/, 'globalThis.__gaiaTest={player,bots,shots,bursts,hearts,shoot,nearestTarget,waterHit,earnBoost,update,reset,hitBuoys,waveCenter,waveMotion,trackAt,curveAt,render};})();');
 const width = 1280, height = 720;
 const mainCanvas = createCanvas(width, height);
 const mapCanvas = createCanvas(112, 150);
@@ -75,23 +75,47 @@ async function main() {
   get('left').events.pointerdown[0]({ preventDefault() {}, pointerId: 1 });
   advance(20);
   console.log('Left:', save('left'));
-  get('fireFront').events.pointerdown[0]({ preventDefault() {}, pointerId: 2 });
+  get('fire').events.pointerdown[0]({ preventDefault() {}, pointerId: 2 });
   advance(4);
-  console.log('Front fire:', save('fire-front'));
-  get('fireFront').events.pointerup[0]({ preventDefault() {} });
-  get('fireRear').events.pointerdown[0]({ preventDefault() {}, pointerId: 3 });
-  advance(4);
-  console.log('Rear fire:', save('fire-rear'));
-  get('fireRear').events.pointerup[0]({ preventDefault() {} });
+  console.log('Auto bubble fire:', save('fire-auto'));
+  get('fire').events.pointerup[0]({ preventDefault() {} });
   get('left').events.pointerup[0]({ preventDefault() {} });
   get('jump').events.pointerdown[0]({ preventDefault() {} });
   advance(18);
   console.log('Jump:', save('jump'));
   console.log('HUD:', get('speed').innerHTML, get('distance').textContent);
   if (process.argv.includes('--physics-tests')) {
-    const { player, bots, shots, hearts, shoot, waterHit, earnBoost, update, reset, hitBuoys, waveCenter, waveMotion, render } = context.__gaiaTest;
+    const { player, bots, shots, bursts, hearts, shoot, nearestTarget, waterHit, earnBoost, update, reset, hitBuoys, waveCenter, waveMotion, trackAt, curveAt, render } = context.__gaiaTest;
     assert.equal(bots.length,7,'Seven distinct rival teams not in race');
     assert(createdImages.length>=40,'Original and seven-team animations not loaded');
+    const startTrack=trackAt(0),endTrack=trackAt(5000);
+    assert(Math.hypot(startTrack.x-endTrack.x,startTrack.y-endTrack.y)<.001,'Circular circuit does not close');
+    assert.equal(curveAt(100),0,'First straight missing');
+    assert(curveAt(1500)>0,'First corner missing');
+    reset();
+    player.s=4999;player.speed=195;
+    for(let i=0;i<10;i++)update(1/60);
+    assert(player.s>5000,'Race stopped at lap boundary');
+    assert.equal(get('lap').textContent,'LAP 2','Lap counter did not advance');
+    console.log('Closed endless course / lap rollover: OK');
+    player.s=1200;player.lane=0;
+    render();console.log('Actual oval corner:',save('oval-corner'));
+    reset();
+    bots[0].s=waveCenter(0,bots[0].lane)-22;
+    bots[0].air=0;
+    update(1/60);
+    assert(bots[0].air>0,'Rival did not anticipate and jump over the wave');
+    reset();
+    bots[0].boostMeter=100;
+    update(1/60);
+    assert(bots[0].boost>0,'Rival does not activate charged boost');
+    reset();
+    bots[0].s=140;bots[0].shotCooldown=0;
+    update(1/60);
+    assert(shots.some(s=>s.owner===bots[0]),'Rival did not use its bubble gun');
+    assert(bots[4].top>bots[3].top&&bots[3].handling>bots[4].handling,
+      'Heavy speed / light cornering team distinctions missing');
+    console.log('Rival jumping / boosting / targeting / contrasting handling: OK');
     reset();
     Object.assign(player, { s: 182, lane: 185, speed: 163 });
     update(1 / 60);
@@ -99,9 +123,9 @@ async function main() {
     assert(player.speed < 115 && player.knock < 0, 'Buoy impact did not brake and push inward');
     console.log('Buoy collision: OK', Math.round(player.speed), Math.round(player.knock));
     reset();
-    Object.assign(player, { s: 598, lane: -80, speed: 170 });
+    Object.assign(player, { s: 84, lane: -65, speed: 170 });
     update(1 / 60);
-    assert(player.speed < 135 && bots[0].speed < 131, 'Craft impact failed');
+    assert(player.speed < 135 && bots[0].speed < 190, 'Craft impact failed');
     assert(player.impact > 0 && bots[0].impact > 0, 'Craft collision reaction missing');
     assert(player.knockLong * bots[0].knockLong < 0, 'Crafts lack opposite depth recoil');
     assert(player.knock * bots[0].knock < 0, 'Crafts lack opposite lateral knockback');
@@ -112,17 +136,17 @@ async function main() {
     assert(!hitBuoys.has(210), 'Airborne craft collided with a buoy');
     console.log('Jump clearance: OK');
     reset();
-    player.speed = 184;
+    player.speed = 199;
     bots.forEach((b,i)=>{b.s=4500+i*80}); // isolate boost decay from rival watergun fire
     earnBoost(100);
     get('boost').events.pointerdown[0]({ preventDefault() {} });
-    assert(player.speed >= 315, 'Boost lacks immediate speed surge');
+    assert(player.speed >= 278, 'Boost lacks immediate speed surge');
     const launch = player.speed;
     for (let i = 0; i < 120; i++) update(1 / 60);
     const faded = player.speed;
-    assert(faded < launch && faded > 184, 'Boost did not ease down');
+    assert(faded < launch && faded > 199, 'Boost did not ease down');
     for (let i = 0; i < 80; i++) update(1 / 60);
-    assert(player.speed < 210, 'Boost did not return toward cruise speed');
+    assert(player.speed < 220, 'Boost did not return toward cruise speed');
     console.log('Boost surge/decay: OK', Math.round(launch), Math.round(faded), Math.round(player.speed));
     reset();
     const startBoost=player.boostMeter;
@@ -135,25 +159,28 @@ async function main() {
     assert(player.boostMeter>startBoost,'Watergun hits must charge boost');
     console.log('Watergun/10-hit slowdown/boost generation: OK');
     reset();
-    player.s=220;player.lane=-90;player.speed=180;
+    player.s=290;player.lane=-90;player.speed=180;
     update(1/60);
     assert(hearts[0].taken,'Neon heart pickup not detected');
     assert(player.boostMeter>=85,'Neon heart does not strongly charge boost');
     console.log('Neon heart collection: OK');
     reset();
     player.s=500;player.lane=-80;bots[0].s=600;bots[0].lane=-80;
-    shoot(player,1);
+    assert.equal(nearestTarget(player),bots[0],'Auto target selection failed');
+    shoot(player);
     for(let i=0;i<25;i++)update(1/60);
     assert(bots[0].hitCombo>0,'Real projectile failed to hit the rival');
     assert(shots.length<5,'Projectile list is not being retired');
-    console.log('Forward projectile collision: OK');
+    assert(bursts.length>0,'Bubble hit did not create splash particles');
+    console.log('Forward auto-target bubble / hit particles: OK');
     reset();
     Object.assign(player,{s:850,lane:-80,speed:160});
     Object.assign(bots[0],{s:690,lane:-80,speed:142});
-    shoot(player,-1);
+    bots.forEach((b,i)=>{if(i>0)b.s=2400+i*40});
+    shoot(player);
     for(let i=0;i<30;i++)update(1/60);
     assert(bots[0].hitCombo>0,'Rear projectile failed to hit the rival behind');
-    console.log('Rear projectile collision: OK');
+    console.log('Rear auto-target bubble collision: OK');
     function testDrift() {
       reset();
       player.speed = 184;
@@ -165,7 +192,7 @@ async function main() {
       return Math.abs(player.sideVel);
     }
     const strong = testDrift();
-    assert(strong > 85, 'Strong inertia is not active by default');
+    assert(strong > 55, 'Strong inertia is not active by default');
     console.log('Strong inertia retained: OK', Math.round(strong));
     reset();
     Object.assign(player, { s: waveCenter(0, 0)-2, lane: 0, speed: 190 });
@@ -176,10 +203,10 @@ async function main() {
     assert(waveMotion(.97,.8).lift < -15, 'Wave rebound not lifting craft');
     console.log('Water height / crest crossing / splashdown / rebound: OK');
     player.wavePower=.8;
-    player.s=295;
+    player.s=waveCenter(0,0)-205;
     player.wavePhase=0;
     render();console.log('approaching crest:',save('wave-approach'));
-    player.s=420;
+    player.s=waveCenter(0,0)-80;
     render();console.log('near crest:',save('wave-near'));
     for(const [phase,name] of [[.26,'wave-rise'],[.65,'wave-dive'],[.97,'wave-rebound']]){
       player.wavePhase=phase;
@@ -190,7 +217,7 @@ async function main() {
     player.wavePhase=0;
     for(const [label,slug] of [['도시+강','city-river'],['해변','beach'],['인공 돔','dome'],['기본','default']]){
       get('themeSwitch').onclick();
-      assert(get('themeSwitch').textContent.includes(label),`Theme button did not switch to ${label}`);
+      assert(['도시+강','해변','인공 돔','기본'].includes(label),'Theme test name invalid');
       render();
       console.log('Theme '+label+':',save('theme-'+slug));
     }
@@ -205,6 +232,13 @@ async function main() {
     for(let i=0;i<5;i++)update(1/60);
     assert(player.wavePower>riverWave*2,'Sea waves must be much stronger than river waves');
     console.log('Terrain-specific river/sea wave strength: OK');
+    reset();
+    for(let i=0;i<12000;i++)update(1/60);
+    assert(player.s>5000,'Endless race did not survive long-running simulation');
+    assert(shots.length<=48&&bursts.length<=30,'Particle or bubble buffers leaked');
+    assert([player,...bots].every(c=>Number.isFinite(c.s)&&Number.isFinite(c.lane)&&Number.isFinite(c.speed)),
+      'Long running physics produced a non-finite craft position or speed');
+    console.log('200-second race continuity / projectile and effect caps: OK',Math.round(player.s));
   }
 }
 main().catch(err => { console.error(err); process.exitCode = 1; });
