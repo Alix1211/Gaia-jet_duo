@@ -47,4 +47,13 @@ node bundle.mjs
 node smoke-preview.cjs ../GAIA-JET-DUO-v14-7TEAM.html --physics-tests
 ```
 
-Both source and bundled offline tests passed in this session. The generated single-file HTML is outside the repo root: `../GAIA-JET-DUO-v14-7TEAM.html` (~8.13 MB). The bundler/tests now reject empty team images: one zero-byte ROYAL front WebP was detected during review and rebuilt from the unchanged original PNG. Check any new commit and `git ls-remote` against GitHub after pushing, and record exactly whether the push succeeded.
+Both source and bundled offline tests passed for the earlier v14 test. The bundler/tests reject empty team images: one zero-byte ROYAL front WebP was detected during review and rebuilt from the unchanged original PNG. Check any new commit and `git ls-remote` against GitHub after pushing, and record exactly whether the push succeeded.
+
+## Critical art correction (v14.1)
+
+- The user's review correctly identified serious art clipping. The original sheets are **not divided into equal-width cells**. Example: KPOP move pose 1 ends around x=560 rather than x=724, meaning the former fixed-width slice cut through pose 2. Many teams have the same problem.
+- `rebuild-team-sheets.py` now extracts the three *actual independent connected RGBA figures* in each source sheet, preserving original pixels in their entirety while removing disconnected background specks. Each figure is centered in a separate generously padded cell, and all borders are validated to have clear transparent margins.
+- New transparent PNG master sprites: `assets-clean/teams/` (21). New game WebPs overwrite only the previous broken **derived** files in `assets/teams/` (21). The originals in `assets-source/teams/` remain untouched.
+- Visual QA contact sheets: `../GAIA-JET-DUO-v14-CUTOUT-QA-MOVE.png`, `../GAIA-JET-DUO-v14-CUTOUT-QA-ATTACK.png`. Source and packed gameplay preview show intact silhouettes; all 42 animated frame borders pass automatic tests.
+- Some **original source art** reaches the original canvas boundary (e.g. ROYAL attack ponytail at image top). No art outside that source exists to extract; any pixel-perfect outpainting at those original edges requires separately approved illustration repair. The current correction eliminates **all newly introduced frame-cutting**, not missing source pixels.
+- Rebuild offline game with `node bundle.mjs` → `../GAIA-JET-DUO-v14.1-CLEAN.html`, then run both source and bundled smoke tests.
