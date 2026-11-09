@@ -1,0 +1,102 @@
+--- jet_duo_v42_work/GAIA-JET-DUO-v41-FINISH-NOBUOY.html	2026-11-09 10:56:33.000000000 +0900
++++ jet_duo_v42_work/GAIA-JET-DUO-v42-DRIFT-TEST.html	2026-11-09 12:14:21.000234830 +0900
+@@ -392,6 +392,8 @@
+ let cameraZoom=1,turboVisual=0,coachHits=0,skyPan=0;
+ // v39 balance TEST: preserve v37 artwork/dialogue; use unified player/AI physics.
+ const BASE_SPEED=199,BOOST_DURATION=6.0,BOOST_EXTRA=30;
++// V42 controlled drift prototype; effects are deferred until tablet handling is approved.
++const DRIFT_ENTRY_SPEED=145,DRIFT_EXIT_SPEED=102,DRIFT_ENTRY_STEER=.68,DRIFT_HOLD_STEER=.25;
+ const PROJECTILE_SPEED=600*WORLD_SCALE/5.2;
+ const WAVE_DURATION=1.27;
+ const TRACK_RADIUS=460*WORLD_SCALE,TRACK_STRAIGHT=(COURSE-2*Math.PI*TRACK_RADIUS)/2;
+@@ -544,7 +546,7 @@
+  DUMMY:{hull:333/608,bottom:.921,center:.495},
+  COACH:{hull:.610,bottom:.990,center:.500}
+ };
+-const player={s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0,blink:0};
++const player={s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,driftTime:0,driftCooldown:0,driftDir:0,driftBlend:0,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0,blink:0};
+ const bots=TEAM_DEFS.map(t=>({...t,speed:0,baseLane:t.lane,sideVel:0,air:0,boost:0,boostMeter:35+t.skill*9,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0,fire:0,shotCooldown:1.5+t.wave*.3,hitCombo:0,comboTime:0,blink:0}));
+ let activeBots=bots;
+ // Fewer boost pickups: no more virtually continuous solo turbo racing.
+@@ -1283,7 +1285,7 @@
+ function reset(){
+  pausedFrom=null;document.getElementById('pauseMenu').classList.add('hidden');
+  countdownGoHideUntil=0;
+- Object.assign(player,{s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,slowTime:0,recoveryTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0,blink:0});
++ Object.assign(player,{s:0,lane:0,speed:0,lean:0,air:0,boost:0,boostMeter:40,driftTime:0,driftCooldown:0,driftDir:0,driftBlend:0,steer:0,sideVel:0,fire:0,fireMode:0,shotCooldown:0,hitCombo:0,comboTime:0,slowTime:0,recoveryTime:0,landing:0,wavePhase:0,wavePower:0,knock:0,knockLong:0,impact:0,hitLean:0,hitCooldown:0,blink:0});
+   elapsed=0;visualTime=0;shake=0;cameraZoom=1;turboVisual=0;skyPan=0;coachHits=0;noirSurge=false;scriptedQuoteUntil=0;noirShown.clear();touchingPairs.clear();shots.length=0;bursts.length=0;quoteQueue=[];hideDialogueQuotes();resetV36Hazards();
+  hearts.forEach(heart=>{heart.taken=false;heart.nextS=heart.s});
+  TEAM_DEFS.forEach((t,i)=>{Object.assign(bots[i],{s:t.s,lane:t.lane,baseLane:t.lane,sideVel:0,air:0,boost:0,boostMeter:35+t.skill*9,speed:0,knock:0,knockLong:0,hitLean:0,impact:0,hitCooldown:0,blink:0,fire:0,shotCooldown:1.5+t.wave*.3,hitCombo:0,comboTime:0,slowTime:0,recoveryTime:0,slipTime:0,fogTime:0,lastPassAward:-1})});
+@@ -1576,6 +1578,24 @@
+  }
+  touchingPairs.clear();for(const pair of touchingNow)touchingPairs.add(pair);
+ }
++function stepPlayerDrift(dt,steerInput){
++ const wasActive=player.driftTime>0;
++ player.driftCooldown=Math.max(0,player.driftCooldown-dt);
++ const hold=player.speed>DRIFT_EXIT_SPEED&&player.air<=0&&player.hitCooldown<=.05&&
++  Math.abs(steerInput)>=DRIFT_HOLD_STEER&&Math.sign(steerInput)===player.driftDir;
++ if(wasActive){
++  player.driftTime=hold?Math.max(0,player.driftTime-dt):0;
++ }else if(keys.brake&&player.driftCooldown<=0&&player.speed>=DRIFT_ENTRY_SPEED&&
++          player.air<=0&&player.hitCooldown<=.05&&Math.abs(steerInput)>=DRIFT_ENTRY_STEER){
++  player.driftDir=Math.sign(steerInput);
++  player.driftTime=1.5;
++  player.driftCooldown=2.05;
++  player.sideVel+=player.driftDir*Math.min(35,18+player.speed*.07);
++ }
++ const active=player.driftTime>0;
++ player.driftBlend+=(Number(active)-player.driftBlend)*(1-Math.exp(-dt*(active?10:5)));
++ return active;
++}
+ function update(dt){
+  if(mode!=='running')return;
+  elapsed+=dt;
+@@ -1604,13 +1624,14 @@
+   }
+  }
+  player.fire=Math.max(0,player.fire-dt);
+- const cornerDrag=cornerResistance(player.s,Math.abs(player.steer),PLAYER_SPEC.grip);
++ const drifting=stepPlayerDrift(dt,steerv);
++ const cornerDrag=cornerResistance(player.s,Math.abs(player.steer),PLAYER_SPEC.grip)*(drifting?.72:1);
+  const boostPower=player.boost>0?1:0;
+  const target=(playerTopSpeed()+BOOST_EXTRA*boostPower)*(player.slowTime>0?.75:1)*(1-cornerDrag);
+  // No auto-throttle. Gas accelerates, released pedals coast with drag, brake
+  // actively sheds speed. A turbo provides temporary independent thrust.
+  if(keys.brake){
+-  const braking=(78+player.speed*.14)*(player.air>0?.26:1);
++  const braking=(78+player.speed*.14)*(player.air>0?.26:1)*(drifting?.48:1);
+   player.speed=Math.max(0,player.speed-braking*dt);
+  }else if(keys.gas||player.boost>0){
+   player.speed=approachSpeed(player.speed,target,dt,PLAYER_SPEC.accel/1.35*(player.recoveryTime>0?.14:1),player.boost>0);
+@@ -1623,10 +1644,10 @@
+  const turning=Math.abs(steerv)>.035;
+  if(turning&&Math.abs(player.sideVel)>68&&player.air<=0)earnBoost(dt*.75);
+  const opposite=turning&&player.sideVel*steerv<0;
+- const response=(turning?profile.turn:profile.release*.68)*PLAYER_SPEC.handling*(1-speedSlip*.25)*(opposite?.78:1)*(player.slipTime>0?.27:1);
++ const response=(turning?profile.turn:profile.release*.68)*PLAYER_SPEC.handling*(1-speedSlip*.25)*(opposite?.78:1)*(player.slipTime>0?.27:1)*(drifting?.66:1);
+  const fineSteer=Math.sign(player.steer)*Math.pow(Math.abs(player.steer),1.32);
+  const jetAuthority=clamp(v/85,0,1)*clamp(1-Math.max(0,v-130)/420,.52,1);
+- const desiredSide=fineSteer*(105+v*.31)*jetAuthority/(1+speedSlip*.26);
++ const desiredSide=fineSteer*(105+v*.31)*jetAuthority/(1+speedSlip*.26)+(drifting?player.driftDir*42:0);
+  player.sideVel+=(desiredSide-player.sideVel)*(1-Math.exp(-dt*response));
+  player.s+=(v/3.6*WORLD_SCALE+player.knockLong)*dt;
+  player.knockLong*=Math.exp(-dt*5);
+@@ -1931,7 +1952,7 @@
+  // Use the ACTUAL analog stick (not just legacy keyboard keys) for the art.
+  // Let go of the stick -> central sprite; lateral water inertia remains in physics.
+  const steerInput=analogActive?analogValue:(keys.right?1:0)-(keys.left?1:0);
+- const visualLean=steerInput===0?0:clamp(steerInput*.78+slide*.16,-1,1);
++ const visualLean=steerInput===0&&player.driftBlend<.02?0:clamp(steerInput*.78+slide*.16+player.driftDir*player.driftBlend*.14,-1,1);
+  const x=w*.5+visualLean*15,y=h*.80,scale=clamp(Math.min(w,h)*.29,98,180);
+  if(player.boost>0){ctx.save();ctx.globalAlpha=.18+.62*clamp(player.boost/BOOST_DURATION,0,1);ctx.strokeStyle='#ffe6a1';ctx.lineWidth=3;for(let i=0;i<10;i++){const yy=y+Math.random()*h*.3;ctx.beginPath();ctx.moveTo(x+(Math.random()-.5)*180,yy);ctx.lineTo(x+(Math.random()-.5)*190,yy+28);ctx.stroke()}ctx.restore()}
+  if(!ready('straight')){
+@@ -1949,7 +1970,7 @@
+  const impactStrength=player.impact/.5;
+  const hitRecoil=player.impact>0?-Math.sin((1-impactStrength)*Math.PI)*impactStrength*13:0;
+  const wavePitch=wave.lift<0?clamp(-wave.lift/75,0,1)*-.015:clamp(wave.submerge,0,1)*.021;
+- const roll=visualLean*.036+Math.sin(visualTime*(1.6+player.speed*.004))*.012+player.hitLean*impactStrength*.19+wavePitch;
++ const roll=visualLean*.036+player.driftDir*player.driftBlend*.045+Math.sin(visualTime*(1.6+player.speed*.004))*.012+player.hitLean*impactStrength*.19+wavePitch;
+  ctx.save();ctx.translate(x+player.hitLean*impactStrength*22,bottom-air+wave.lift+bob+recoil+hitRecoil);ctx.rotate(roll);
+  if(!(player.blink>0&&Math.floor(visualTime*10)%2===0))ctx.drawImage(art[id],-spriteW*.5,-spriteH,spriteW,spriteH);ctx.restore();
+  if(shooting){
