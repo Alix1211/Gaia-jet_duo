@@ -140,16 +140,30 @@ public final class MainActivity extends Activity {
             vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         }
         if (vibrator == null || !vibrator.hasVibrator()) return;
+        // V50: stronger and longer patterns, full amplitude (255) on hard hits.
         switch (effect) {
-            case "collision":
-                vibrator.vibrate(VibrationEffect.createWaveform(
-                        new long[]{0, 55, 35, 85}, new int[]{0, 155, 0, 220}, -1));
-                break;
-            case "boost": vibrator.vibrate(VibrationEffect.createOneShot(75, 190)); break;
-            case "jump": vibrator.vibrate(VibrationEffect.createOneShot(23, 65)); break;
-            case "drift": vibrator.vibrate(VibrationEffect.createOneShot(38, 95)); break;
+            case "collision": wave(vibrator, new long[]{0, 80, 40, 130}, new int[]{0, 220, 0, 255}); break;
+            case "bomb":      wave(vibrator, new long[]{0, 140, 50, 110, 40, 90}, new int[]{0, 255, 0, 255, 0, 200}); break;
+            case "slip":      wave(vibrator, new long[]{0, 60, 50, 60, 50, 60, 50, 60}, new int[]{0, 190, 0, 190, 0, 190, 0, 190}); break;
+            case "fog":       one(vibrator, 170, 140); break;
+            case "wave":      wave(vibrator, new long[]{0, 70, 40, 110}, new int[]{0, 170, 0, 235}); break;
+            case "land":      one(vibrator, 90, 230); break;
+            case "boost":     one(vibrator, 130, 255); break;
+            case "jump":      one(vibrator, 45, 150); break;
+            case "drift":     one(vibrator, 60, 140); break;
+            case "miniPerfect": wave(vibrator, new long[]{0, 50, 40, 50, 40, 90}, new int[]{0, 255, 0, 255, 0, 255}); break;
+            case "miniGood":    one(vibrator, 85, 220); break;
+            case "miniMiss":    one(vibrator, 180, 150); break;
             default: break;
         }
+    }
+
+    private static void one(Vibrator v, long ms, int amplitude) {
+        v.vibrate(VibrationEffect.createOneShot(ms, amplitude));
+    }
+
+    private static void wave(Vibrator v, long[] timings, int[] amplitudes) {
+        v.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
     }
 
     @Override public void onBackPressed() {

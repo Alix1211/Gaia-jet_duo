@@ -1813,7 +1813,7 @@ function update(dt){
  player.blink=Math.max(0,(player.blink||0)-dt);
  player.impact=Math.max(0,player.impact-dt);
  const wasAir=player.air;player.air=Math.max(0,player.air-dt);
- if(wasAir>0&&player.air===0){player.landing=.55;earnBoost(4);}
+ if(wasAir>0&&player.air===0){player.landing=.55;earnBoost(4);gaiaHaptic('land');}
  player.landing=Math.max(0,player.landing-dt);
  if(player.wavePhase>0){player.wavePhase+=dt;if(player.wavePhase>=WAVE_DURATION)player.wavePhase=0;}
  // B mode: both sides shoot automatically; holding the pistol means rapid focus-fire.
@@ -1845,10 +1845,11 @@ function update(dt){
  const turning=Math.abs(steerv)>.035;
  if(turning&&Math.abs(player.sideVel)>68&&player.air<=0)earnBoost(dt*.75);
  const opposite=turning&&player.sideVel*steerv<0;
- const response=(turning?profile.turn:profile.release*.68)*PLAYER_SPEC.handling*(1-speedSlip*.25)*(opposite?.78:1)*(player.slipTime>0?.27:1)*(drifting?.66:1);
+ const heavy=clamp((v-120)/110,0,1);
+ const response=(turning?profile.turn:profile.release*.68)*PLAYER_SPEC.handling*(1-speedSlip*.25)*(1-heavy*.15)*(opposite?.78:1)*(player.slipTime>0?.27:1)*(drifting?.66:1);
  const fineSteer=Math.sign(player.steer)*Math.pow(Math.abs(player.steer),1.32);
- const jetAuthority=clamp(v/85,0,1)*clamp(1-Math.max(0,v-130)/420,.52,1);
- const desiredSide=fineSteer*(105+v*.31)*jetAuthority/(1+speedSlip*.26)+(drifting?player.driftDir*100:0);
+ const jetAuthority=clamp(v/70,0,1)*clamp(1-Math.max(0,v-130)/420,.52,1);
+ const desiredSide=fineSteer*(105+v*.31)*jetAuthority*(1-heavy*.22)/(1+speedSlip*.26)+(drifting?player.driftDir*100:0);
  player.sideVel+=(desiredSide-player.sideVel)*(1-Math.exp(-dt*response));
  player.s+=(v/3.6*WORLD_SCALE+player.knockLong)*dt;
  player.knockLong*=Math.exp(-dt*5);
@@ -1867,7 +1868,7 @@ function update(dt){
    player.slowTime=Math.max(player.slowTime,1.15);
    player.impact=Math.max(player.impact,.42);
    shake=Math.max(shake,7.5);
-   splashAt(player,true);
+   splashAt(player,true);gaiaHaptic('wave');
    bark('WAVE',9);
   }
  }
@@ -1887,7 +1888,8 @@ function update(dt){
  const nearCorner=Math.abs(curveAt(b.s+80*WORLD_SCALE))>.00008;
   const cornerSpeed=1-cornerResistance(b.s+80*WORLD_SCALE,Math.abs(b.sideVel)/150,b.grip);
   const boosted=b.boost>0;
-  const targetSpeed=(b.top*cornerSpeed+(boosted?BOOST_EXTRA:0))*(b.slowTime>0?.76:1);
+  const bandGap=(b.s-player.s)/WORLD_SCALE;const band=raceConfig.id==='coach'?1:(bandGap>60?1-clamp((bandGap-60)/260,0,1)*.15:bandGap<-60?1+clamp((-bandGap-60)/260,0,1)*.08:1);
+  const targetSpeed=(b.top*cornerSpeed+(boosted?BOOST_EXTRA:0))*(b.slowTime>0?.76:1)*band;
   b.speed=approachSpeed(b.speed,targetSpeed,dt,b.accel*(b.recoveryTime>0?.14:1),boosted);
   b.s+=(b.speed/3.6*WORLD_SCALE+b.knockLong)*dt;
   b.knockLong*=Math.exp(-dt*4.5);
@@ -1901,13 +1903,16 @@ function update(dt){
   for(const shot of shots){if(shot.owner===b)continue;const gap=shot.s-b.s;if(Math.abs(gap)<190&&Math.abs(shot.lane-b.lane)<42)avoid+=(b.lane<shot.lane?-65:65)*b.skill;}
   let desiredLane=raceConfig.id==='coach'?clamp(player.lane+Math.sin(elapsed*.65+b.wave)*31,-LANE+40,LANE-40):clamp(b.baseLane+Math.sin(elapsed*.36+b.wave)*47+avoid,-LANE+40,LANE-40);
   // Buoy markers never force a lane change; only bomb/balloon hazards do.
-  const baseLap=Math.floor(b.s/COURSE),localS=b.s-baseLap*COURSE;
-  let upcoming=null,upcomingDistance=Infinity;
-  for(const hazard of V36_ITEMS){
-   let d=hazard.metres*WORLD_SCALE-localS;if(d < -65)d+=COURSE;
-   if(d<900&&d<upcomingDistance){upcoming=hazard;upcomingDistance=d;}
+  const baseLap=Math.floor(b.s/COURSE);
+  let upcoming=null,upcomingDistance=Infinity,upcomingLap=baseLap;
+  for(let lp=baseLap;lp<=baseLap+1;lp++)for(const hazard of v36LapItems(lp)){
+   const d=lp*COURSE+hazard.metres*WORLD_SCALE-b.s;
+   if(d>=-65&&d<900&&d<upcomingDistance){upcoming=hazard;upcomingDistance=d;upcomingLap=lp;}
   }
-  if(upcoming&&Math.abs(desiredLane-upcoming.lane)<88){
+  // Rivals sometimes fail to notice a hazard (fixed per rival+hazard), so they get hit too.
+  const hazardRoll=upcoming?Math.abs((Math.sin(upcoming.metres*12.9898+activeBots.indexOf(b)*78.233+upcomingLap*37.719+v36Salt*.001)*43758.5453)%1):1;
+  const noticesHazard=hazardRoll>=clamp(.42-.12*(b.skill-.6),.25,.45);
+  if(upcoming&&noticesHazard&&Math.abs(desiredLane-upcoming.lane)<88){
    const side=b.baseLane<=upcoming.lane?-1:1;
    const escape=clamp(upcoming.lane+side*110,-LANE+40,LANE-40);
    const weight=clamp((900-upcomingDistance)/680,0,.43+.42*b.skill);
@@ -2267,19 +2272,21 @@ function frame(now){const dt=Math.min(.04,Math.max(0,(now-last)/1000));last=now;
  requestAnimationFrame(frame)}
 // GAIA JET DUO v37: hazards MUST share this closure with player, ctx and raceConfig.
 // In v36 they were in a separate script and failed with ReferenceError during rendering.
-const V36_ITEMS=[
- {kind:'bomb',metres:560,lane:-92},
- {kind:'slipBalloon',metres:1020,lane:100},
- {kind:'fogBalloon',metres:1500,lane:-45},
- {kind:'bomb',metres:2030,lane:92},
- {kind:'slipBalloon',metres:2490,lane:-102},
- {kind:'fogBalloon',metres:2920,lane:76},
- {kind:'bomb',metres:3440,lane:-92},
- {kind:'slipBalloon',metres:4010,lane:65},
- {kind:'fogBalloon',metres:4510,lane:-96}
-];
+let v36Salt=0;const V36_LAPS=new Map();
+function v36LapItems(lap){
+ lap=Math.max(0,lap|0);let items=V36_LAPS.get(lap);if(items)return items;
+ let seed=(lap*7919+104729+v36Salt*131)>>>0;
+ const rnd=()=>{seed=(seed+0x6D2B79F5)>>>0;let t=seed;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+ items=[];const kinds=['bomb','slipBalloon','fogBalloon','bomb','slipBalloon','bomb','fogBalloon','slipBalloon'];
+ let m=380+rnd()*120,prev=0,n=0;
+ while(m<4750&&n<22){
+  let lane=Math.round((rnd()*2-1)*118);if(Math.abs(lane-prev)<55)lane=lane>=0?lane-70:lane+70;lane=clamp(lane,-118,118);
+  items.push({kind:kinds[Math.floor(rnd()*kinds.length)],metres:Math.round(m),lane});prev=lane;m+=190+rnd()*130;n++;
+ }
+ V36_LAPS.set(lap,items);return items;
+}
 const v36ItemHits=new Set(),v36BotHits=new Set(),v36ItemBursts=[];
-function resetV36Hazards(){v36ItemHits.clear();v36BotHits.clear();v36ItemBursts.length=0;player.slipTime=0;player.fogTime=0;}
+function resetV36Hazards(){v36Salt=Math.floor(Math.random()*1000000);V36_LAPS.clear();v36ItemHits.clear();v36BotHits.clear();v36ItemBursts.length=0;player.slipTime=0;player.fogTime=0;}
 function playV36Bomb(){
  const ac=ensureRaceMixer();
  if(!ac||ac.state!=='running'){playRaceEffect('buoy');return;}
@@ -2299,17 +2306,17 @@ function hitV36Item(item,lap,at,target=player){
  if(hits.has(unique))return;
  hits.add(unique);v36ItemBursts.push({kind:item.kind,s:at,lane:item.lane,age:0,seed:Math.random()*7});
  if(item.kind==='bomb'){
-  if(target===player){playV36Bomb();shake=Math.max(shake,18)}
+  if(target===player){playV36Bomb();shake=Math.max(shake,18);gaiaHaptic('bomb')}
   applySpeedLoss(target,.43);target.slowTime=Math.max(target.slowTime||0,1.5);
   target.recoveryTime=Math.max(target.recoveryTime||0,1.1);
   target.knock+=(item.lane<=target.lane?1:-1)*105;target.impact=Math.max(target.impact,.95);
  }else if(item.kind==='slipBalloon'){
-  if(target===player)playRaceEffect('buoy',.45);
+  if(target===player){playRaceEffect('buoy',.45);gaiaHaptic('slip')}
   target.slipTime=Math.max(target.slipTime||0,3.8);
   const side=Math.sign(target.sideVel)||Math.sign(target.steer||0)||(Math.random()<.5?-1:1);
   target.sideVel+=side*68;if(target===player)shake=Math.max(shake,4);
  }else if(item.kind==='fogBalloon'){
-  if(target===player)playRaceEffect('buoy',.40);
+  if(target===player){playRaceEffect('buoy',.40);gaiaHaptic('fog')}
   target.fogTime=Math.max(target.fogTime||0,4.5);
  }
 }
@@ -2321,7 +2328,7 @@ function updateV36Hazards(dt,oldS,oldLane,oldBots=[]){
  for(const {target,s,lane} of fleet){
   if(target.air>.12)continue;
   const first=Math.max(0,Math.floor(s/COURSE)),last=Math.floor(target.s/COURSE);
-  for(let lap=first;lap<=last;lap++)for(const item of V36_ITEMS){
+  for(let lap=first;lap<=last;lap++)for(const item of v36LapItems(lap)){
    const at=lap*COURSE+item.metres*WORLD_SCALE;
    if(at<s-70||at>target.s+70)continue;
    if(pathHit(s,lane,target.s,target.lane,at,item.lane,at,item.lane,48,52))hitV36Item(item,lap,at,target);
@@ -2332,7 +2339,7 @@ function drawV36Items(){
  if(raceConfig.id==='coach')return;
  const first=Math.max(0,Math.floor(player.s/COURSE)),last=Math.floor((player.s+1450)/COURSE);
  const visible=[];
- for(let lap=first;lap<=last;lap++)for(const item of V36_ITEMS){
+ for(let lap=first;lap<=last;lap++)for(const item of v36LapItems(lap)){
   const at=lap*COURSE+item.metres*WORLD_SCALE,z=at-player.s;
   if(z<55||z>1450||v36ItemHits.has(lap+':'+item.metres+':'+item.kind))continue;
   visible.push({...item,z});
@@ -2389,6 +2396,8 @@ requestAnimationFrame(frame);
 // 게임 쪽(iframe)은 parent.GAIA.minigame.onResult(r) 로 결과를 알리고, '다시'가 가능한지는 canRetry() 로 묻는다.
 (function () {
   const G = window.GAIA, defs = {};
+  const nh = e => { try { window.GaiaNative?.postMessage(JSON.stringify({ type: 'haptic', effect: e })); } catch (_) {} };
+  window.GAIA_HAPTICS = { fx: { miniPerfect: () => nh('miniPerfect'), miniGood: () => nh('miniGood'), miniMiss: () => nh('miniMiss'), miniBad: () => nh('miniMiss') } };
   let cur = null, root = null, fr = null, battingStreak = 0;
   function ensure() {
     if (root) return;

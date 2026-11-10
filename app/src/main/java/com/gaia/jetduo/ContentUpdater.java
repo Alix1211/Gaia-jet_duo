@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * Update only code/images/audio embedded in the downloaded single HTML file.
  */
 final class ContentUpdater {
-    static final int BUNDLED_VERSION = 49;
+    static final int BUNDLED_VERSION = 50;
     private static final long MAX_HTML_BYTES = 80L * 1024 * 1024;
     private static final int MAX_MANIFEST_BYTES = 16 * 1024;
     private final File contentFile;

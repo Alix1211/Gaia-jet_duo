@@ -10,8 +10,8 @@ android {
         applicationId = "com.gaia.jetduo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 49
-        versionName = "0.49.0-script-fix"
+        versionCode = 50
+        versionName = "0.50.0-racing-haptics"
 
         // Opt-in: the game stays completely offline until a trusted HTTPS
         // manifest URL is intentionally configured by the project owner.
